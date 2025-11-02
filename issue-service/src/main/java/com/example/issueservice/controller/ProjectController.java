@@ -1,0 +1,65 @@
+package com.example.issueservice.controller;
+
+import com.example.issueservice.dto.CreateProjectRequestDTO;
+import com.example.issueservice.dto.ProjectDTO;
+import com.example.issueservice.service.ProjectService;
+import com.juvarya.commonservice.dto.StandardResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * Controller for project management endpoints
+ */
+@RestController
+@RequestMapping("/api/orgs/{orgId}/projects")
+@RequiredArgsConstructor
+public class ProjectController {
+
+    private final ProjectService projectService;
+
+    @PostMapping
+    public StandardResponse<ProjectDTO> createProject(
+            @PathVariable Long orgId,
+            @Valid @RequestBody CreateProjectRequestDTO request) {
+        
+        ProjectDTO project = projectService.createProject(orgId, request);
+        return StandardResponse.single(project, "Project created successfully");
+    }
+
+    @GetMapping
+    public StandardResponse<ProjectDTO> getProjects(
+            @PathVariable Long orgId,
+            @RequestParam(required = false) String search,
+            Pageable pageable) {
+        
+        Page<ProjectDTO> projects = search != null && !search.isEmpty()
+            ? projectService.searchProjects(orgId, search, pageable)
+            : projectService.getOrganizationProjects(orgId, pageable);
+        
+        return StandardResponse.page(projects);
+    }
+
+    @GetMapping("/{projectId}")
+    public StandardResponse<ProjectDTO> getProject(@PathVariable Long projectId) {
+        ProjectDTO project = projectService.getProjectById(projectId);
+        return StandardResponse.single(project);
+    }
+
+    @PutMapping("/{projectId}")
+    public StandardResponse<ProjectDTO> updateProject(
+            @PathVariable Long projectId,
+            @Valid @RequestBody CreateProjectRequestDTO request) {
+        
+        ProjectDTO project = projectService.updateProject(projectId, request);
+        return StandardResponse.single(project, "Project updated successfully");
+    }
+
+    @DeleteMapping("/{projectId}")
+    public StandardResponse<Void> deactivateProject(@PathVariable Long projectId) {
+        projectService.deactivateProject(projectId);
+        return StandardResponse.single(null, "Project deactivated successfully");
+    }
+}
