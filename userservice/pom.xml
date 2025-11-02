@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.example</groupId>
-        <artifactId>jira-clone</artifactId>
+        <artifactId>itsbackend</artifactId>
         <version>1.0.0</version>
     </parent>
-    <artifactId>incuserservice</artifactId>
+    <artifactId>userservice</artifactId>
     <name>incuserservice</name>
     <packaging>jar</packaging>
 

@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>jira-clone</artifactId>
+    <artifactId>itsbackend</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-    <name>jira-clone</name>
+    <name>itsbackend</name>
 
     <properties>
         <java.version>17</java.version>
@@ -23,8 +23,8 @@
         <module>apigateway</module>
         <module>authservice</module>
         <module>userservice</module>
-        <module>project-service</module>
-        <module>issue-service</module>
+        <module>projectservice</module>
+        <module>issueservice</module>
         <module>notificationservice</module>
     </modules>
 
