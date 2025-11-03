@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface GroupHistoryRepository extends JpaRepository<GroupHistoryModel, Long> {
-    List<GroupHistoryModel> findByTicketIdOrderByChangedAtAsc(Long ticketId);
+    List<GroupHistoryModel> findByTicketIdOrderByChangedAtDesc(Long ticketId);
 }

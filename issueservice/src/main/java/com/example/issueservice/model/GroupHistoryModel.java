@@ -9,9 +9,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "group_history", indexes = {
-        @Index(name = "idx_group_history_ticket", columnList = "ticket_id,changedAt")
-})
+@Table(
+    name = "group_history",
+    indexes = {
+        @Index(name = "idx_ticket_group_hist", columnList = "ticket_id,changedAt")
+    }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,19 +28,19 @@ public class GroupHistoryModel {
     @JoinColumn(name = "ticket_id", nullable = false)
     private TicketModel ticket;
 
-    @Column
+    @Column(name = "from_group_id")
     private Long fromGroupId;
 
-    @Column
+    @Column(name = "to_group_id")
     private Long toGroupId;
 
-    @Column
+    @Column(name = "changed_by")
     private Long changedBy;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 1000)
     private String note;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(name = "changed_at", nullable = false, updatable = false)
     private Instant changedAt;
 }

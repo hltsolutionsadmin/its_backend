@@ -17,4 +17,7 @@ public class AssignTicketRequestDTO {
     private Long userId;  // Required if assignmentType = USER
     
     private Long groupId;  // Required if assignmentType = GROUP
+    
+    // Optional note to record in history/group history
+    private String note;
 }
