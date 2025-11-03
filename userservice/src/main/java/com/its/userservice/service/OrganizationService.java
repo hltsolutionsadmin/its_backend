@@ -17,9 +17,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.security.SecureRandom;
 
 /**
  * Service for organization management operations
@@ -33,6 +35,7 @@ public class OrganizationService {
     private final UserRepository userRepository;
     private final OrganizationUserRepository organizationUserRepository;
     private final OrganizationPopulator organizationPopulator;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public OrganizationDTO createOrganization(CreateOrganizationRequestDTO request, Long ownerId) {
@@ -41,7 +44,7 @@ public class OrganizationService {
         if (organizationRepository.existsByOrgCode(request.getOrgCode())) {
             throw new HltCustomerException(ErrorCode.ORG_CODE_TAKEN);
         }
-        
+
         UserModel owner = userRepository.findById(ownerId)
             .orElseThrow(() -> new HltCustomerException(ErrorCode.USER_NOT_FOUND));
         
@@ -70,6 +73,34 @@ public class OrganizationService {
         log.info("Organization created successfully with ID: {}", organization.getId());
         
         return organizationPopulator.populate(organization);
+    }
+
+    // Helper: generate a unique username from email local-part, suffixing with numbers if needed
+    private String generateUniqueUsernameFromEmail(String email) {
+        String local = email.split("@")[0].replaceAll("[^a-zA-Z0-9._-]", "");
+        if (local.isBlank()) {
+            local = "user";
+        }
+        String base = local.length() > 30 ? local.substring(0, 30) : local; // respect typical limits
+        String candidate = base;
+        int suffix = 1;
+        while (userRepository.existsByUsername(candidate)) {
+            String s = String.valueOf(suffix++);
+            int maxBase = Math.max(1, 50 - s.length()); // UserModel.username length = 50
+            candidate = base.substring(0, Math.min(base.length(), maxBase)) + s;
+        }
+        return candidate;
+    }
+
+    // Helper: generate a secure temporary password
+    private String generateTemporaryPassword() {
+        final String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+";
+        SecureRandom rnd = new SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 12; i++) {
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 
     @Transactional(readOnly = true)
@@ -117,8 +148,19 @@ public class OrganizationService {
         
         // Find or create user
         UserModel invitee = userRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new HltCustomerException(ErrorCode.USER_NOT_FOUND, 
-                "User with email " + request.getEmail() + " not found. They must register first."));
+            .orElseGet(() -> {
+                log.info("User with email {} not found. Creating a new user for invite.", request.getEmail());
+                UserModel newUser = new UserModel();
+                newUser.setEmail(request.getEmail());
+                String generatedUsername = generateUniqueUsernameFromEmail(request.getEmail());
+                newUser.setUsername(generatedUsername);
+                String tempPassword = generateTemporaryPassword();
+                newUser.setPasswordHash(passwordEncoder.encode(tempPassword));
+                newUser.setActive(true);
+                newUser.setEmailVerified(false);
+                // Names/phone can be set later by the user after activation
+                return userRepository.save(newUser);
+            });
         
         // Check if already a member
         if (organizationUserRepository.existsByOrganizationIdAndUserId(orgId, invitee.getId())) {

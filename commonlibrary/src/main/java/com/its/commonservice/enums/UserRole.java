@@ -13,5 +13,6 @@ public enum UserRole {
     ORG_ADMIN,
     PROJECT_MANAGER,
     MEMBER,
-    CLIENT
+    CLIENT,
+    ORG_MEMBER
 }

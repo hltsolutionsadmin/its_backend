@@ -39,3 +39,4 @@ public class CreateOrganizationRequestDTO {
     @Size(max = 100, message = "Country cannot exceed 100 characters")
     private String country;
 }
+

@@ -83,7 +83,7 @@ public class OrganizationController {
      */
     @PostMapping("/{orgId}/users")
     public StandardResponse<Void> inviteUser(
-            @PathVariable Long orgId,
+            @PathVariable("orgId") Long orgId,
             @Valid @RequestBody InviteUserRequestDTO request,
             @RequestAttribute("userId") Long userId) {
         
