@@ -8,8 +8,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.example.issueservice.enums.ProjectStatus;
+import com.example.issueservice.enums.ProjectType;
 
 /**
  * Project entity
@@ -45,6 +49,26 @@ public class ProjectModel {
     
     @Column(nullable = false)
     private Boolean active = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 32)
+    private ProjectStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 32)
+    private ProjectType type;
+
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private LocalDate targetEndDate;
+    private LocalDate dueDate;
+
+    private Long ownerOrganizationId;
+    private Long clientOrganizationId;
+    private Long clientId;
+
+    @Column
+    private Integer progressPercentage;
     
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
