@@ -2,6 +2,7 @@ package com.its.userservice.controller;
 
 import com.its.userservice.dto.AuthResponseDTO;
 import com.its.userservice.dto.LoginRequestDTO;
+import com.its.userservice.dto.EmailLoginRequestDTO;
 import com.its.userservice.dto.RegisterRequestDTO;
 import com.its.userservice.dto.UserDTO;
 import com.its.userservice.service.AuthService;
@@ -38,6 +39,18 @@ public class AuthController {
     @PostMapping("/login")
     public StandardResponse<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         AuthResponseDTO response = authService.login(request);
+        return StandardResponse.single(response, "Login successful");
+    }
+
+    /**
+     * Login with email and password
+     * POST /api/auth/login/email
+     */
+    @PostMapping("/login/email")
+    public StandardResponse<AuthResponseDTO> loginWithEmail(@Valid @RequestBody EmailLoginRequestDTO request) {
+        // Reuse existing login flow by mapping email to usernameOrEmail
+        LoginRequestDTO mapped = new LoginRequestDTO(request.getEmail(), request.getPassword());
+        AuthResponseDTO response = authService.login(mapped);
         return StandardResponse.single(response, "Login successful");
     }
 
