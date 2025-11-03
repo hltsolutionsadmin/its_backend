@@ -6,6 +6,10 @@ import com.example.issueservice.repository.*;
 import com.its.commonservice.enums.AssignmentType;
 import com.its.commonservice.enums.CommentType;
 import com.its.commonservice.enums.TicketStatus;
+import com.its.commonservice.enums.IssueType;
+import com.its.commonservice.enums.Impact;
+import com.its.commonservice.enums.Urgency;
+import com.its.commonservice.enums.SlaType;
 import com.its.commonservice.exception.ErrorCode;
 import com.its.commonservice.exception.HltCustomerException;
 import lombok.RequiredArgsConstructor;
@@ -60,10 +64,10 @@ public class TicketService {
         ticket.setProject(project);
         ticket.setTitle(request.getTitle());
         ticket.setDescription(request.getDescription());
-        ticket.setIssueType(request.getIssueType());
-        ticket.setImpact(request.getImpact());
-        ticket.setUrgency(request.getUrgency());
-        ticket.setSlaType(request.getSlaType());
+        ticket.setIssueType(parseEnum(IssueType.class, request.getIssueType(), IssueType.INCIDENT));
+        ticket.setImpact(parseEnum(Impact.class, request.getImpact(), Impact.MEDIUM));
+        ticket.setUrgency(parseEnum(Urgency.class, request.getUrgency(), Urgency.MEDIUM));
+        ticket.setSlaType(parseEnum(SlaType.class, request.getSlaType(), SlaType.STANDARD));
 
         // Compute priority code and SLA based on impact/urgency
         String priorityCode = computePriorityCode(request.getImpact(), request.getUrgency());
@@ -94,15 +98,16 @@ public class TicketService {
             ticket.setCategory(category);
         }
 
-        // Default assign to L1 group if exists
+        // Default assign to L1 group if exists (avoid lambda to keep 'ticket' effectively final)
         Optional<GroupModel> l1Opt = groupRepository
                 .findByOrganizationIdAndLevel(orgId, com.its.commonservice.enums.GroupLevel.L1)
                 .stream().findFirst();
 
-        l1Opt.ifPresent(g -> {
+        if (l1Opt.isPresent()) {
+            GroupModel g = l1Opt.get();
             ticket.setAssignmentType(AssignmentType.GROUP);
             ticket.setAssignedGroupId(g.getId());
-        });
+        }
 
         ticket = ticketRepository.save(ticket);
 
@@ -201,6 +206,70 @@ public class TicketService {
         log.info("Ticket {} status updated successfully", ticketId);
     }
 
+    /**
+     * Add a comment to a ticket
+     */
+    @Transactional
+    public CommentDTO addComment(Long ticketId, AddCommentRequestDTO request, Long userId) {
+        TicketModel ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new HltCustomerException(ErrorCode.TICKET_NOT_FOUND));
+
+        CommentModel c = new CommentModel();
+        c.setTicket(ticket);
+        c.setAuthorId(userId);
+        c.setText(request.getText());
+        c.setType(request.getType());
+        c.setIsInternal(Boolean.TRUE.equals(request.getIsInternal()));
+        c = commentRepository.save(c);
+
+        return mapComment(c);
+    }
+
+    /**
+     * Get all comments for a ticket (ascending by createdAt)
+     */
+    @Transactional(readOnly = true)
+    public List<CommentDTO> getTicketComments(Long ticketId) {
+        List<CommentModel> list = commentRepository.findByTicketIdOrderByCreatedAtAsc(ticketId);
+        return list.stream().map(this::mapComment).collect(Collectors.toList());
+    }
+
+    /**
+     * Add internal/external work note entry
+     */
+    @Transactional
+    public WorkNoteDTO addWorkNote(Long ticketId, AddWorkNoteRequestDTO request, Long userId) {
+        TicketModel ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new HltCustomerException(ErrorCode.TICKET_NOT_FOUND));
+
+        WorkNoteModel m = new WorkNoteModel();
+        m.setTicket(ticket);
+        m.setCreatedBy(userId);
+        m.setNote(request.getNote());
+        m.setInternalNote(request.isInternal());
+        m = workNoteRepository.save(m);
+
+        return mapWorkNote(m);
+    }
+
+    /**
+     * Get work notes for a ticket (ascending by createdAt)
+     */
+    @Transactional(readOnly = true)
+    public List<WorkNoteDTO> getWorkNotes(Long ticketId) {
+        List<WorkNoteModel> list = workNoteRepository.findByTicketIdOrderByCreatedAtAsc(ticketId);
+        return list.stream().map(this::mapWorkNote).collect(Collectors.toList());
+    }
+
+    /**
+     * Get ticket history entries (descending by createdAt)
+     */
+    @Transactional(readOnly = true)
+    public List<TicketHistoryDTO> getTicketHistory(Long ticketId) {
+        List<TicketHistoryModel> list = historyRepository.findByTicketIdOrderByCreatedAtDesc(ticketId);
+        return list.stream().map(this::mapHistory).collect(Collectors.toList());
+    }
+
     // --- Utility + Builder Methods ---
 
     private void createHistoryEntry(TicketModel ticket, Long userId, String field, String oldValue, String newValue, String desc) {
@@ -212,6 +281,42 @@ public class TicketService {
         history.setNewValue(newValue);
         history.setChangeDescription(desc);
         historyRepository.save(history);
+    }
+
+    private CommentDTO mapComment(CommentModel c) {
+        return CommentDTO.builder()
+                .id(c.getId())
+                .ticketId(c.getTicket().getId())
+                .authorId(c.getAuthorId())
+                .text(c.getText())
+                .type(c.getType())
+                .isInternal(c.getIsInternal())
+                .createdAt(c.getCreatedAt())
+                .build();
+    }
+
+    private WorkNoteDTO mapWorkNote(WorkNoteModel m) {
+        return WorkNoteDTO.builder()
+                .id(m.getId())
+                .ticketId(m.getTicket().getId())
+                .createdBy(m.getCreatedBy())
+                .note(m.getNote())
+                .internal(m.getInternalNote())
+                .createdAt(m.getCreatedAt())
+                .build();
+    }
+
+    private TicketHistoryDTO mapHistory(TicketHistoryModel h) {
+        return TicketHistoryDTO.builder()
+                .id(h.getId())
+                .ticketId(h.getTicket().getId())
+                .changedBy(h.getChangedBy())
+                .fieldName(h.getFieldName())
+                .oldValue(h.getOldValue())
+                .newValue(h.getNewValue())
+                .changeDescription(h.getChangeDescription())
+                .createdAt(h.getCreatedAt())
+                .build();
     }
 
     private String generateTicketNumber(String projectCode) {
@@ -313,18 +418,18 @@ public class TicketService {
                 .projectCode(t.getProject().getProjectCode())
                 .title(t.getTitle())
                 .description(t.getDescription())
-                .issueType(t.getIssueType())
+                .issueType(t.getIssueType() != null ? t.getIssueType().name() : null)
                 .status(t.getStatus())
                 .priority(t.getPriority())
-                .impact(t.getImpact())
-                .urgency(t.getUrgency())
+                .impact(t.getImpact() != null ? t.getImpact().name() : null)
+                .urgency(t.getUrgency() != null ? t.getUrgency().name() : null)
                 .reporterId(t.getReporterId())
                 .requestName(t.getRequestName())
                 .requestContact(t.getRequestContact())
                 .assignmentType(t.getAssignmentType())
                 .assignedUserId(t.getAssignedUserId())
                 .assignedGroupId(t.getAssignedGroupId())
-                .slaType(t.getSlaType())
+                .slaType(t.getSlaType() != null ? t.getSlaType().name() : null)
                 .responseSlaHours(t.getResponseSlaHours())
                 .resolutionSlaHours(t.getResolutionSlaHours())
                 .slaResponseDueAt(t.getSlaResponseDueAt())
@@ -334,5 +439,14 @@ public class TicketService {
                 .createdAt(t.getCreatedAt())
                 .updatedAt(t.getUpdatedAt())
                 .build();
+    }
+
+    private static <E extends Enum<E>> E parseEnum(Class<E> type, String value, E defaultVal) {
+        if (value == null || value.isBlank()) return defaultVal;
+        try {
+            return Enum.valueOf(type, value.trim().toUpperCase().replace(' ', '_'));
+        } catch (IllegalArgumentException ex) {
+            return defaultVal;
+        }
     }
 }
