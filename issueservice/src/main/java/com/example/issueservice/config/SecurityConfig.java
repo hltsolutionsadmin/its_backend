@@ -1,6 +1,7 @@
 package com.example.issueservice.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -20,12 +21,15 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
+    @ConditionalOnMissingBean(SecurityFilterChain.class)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    "/error",
+                    "/actuator/**",
                     "/actuator/health",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",

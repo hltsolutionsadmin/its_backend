@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Service for project management operations
@@ -81,8 +82,8 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public ProjectDTO getProjectById(Long projectId) {
         ProjectModel project = projectRepository.findById(projectId)
-            .orElseThrow(() -> new HltCustomerException(ErrorCode.PROJECT_NOT_FOUND));
-        
+                .orElseThrow(() -> new HltCustomerException(ErrorCode.PROJECT_NOT_FOUND));
+
         return buildProjectDTO(project);
     }
 
@@ -153,11 +154,38 @@ public class ProjectService {
         // total count
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<ProjectModel> countRoot = countQuery.from(ProjectModel.class);
-        countQuery.select(cb.count(countRoot)).where(predicates.toArray(new Predicate[0]));
+        List<Predicate> countPredicates = new ArrayList<>();
+        countPredicates.add(cb.equal(countRoot.get("organizationId"), orgId));
+        if (search != null && !search.isBlank()) {
+            String like = "%" + search.toLowerCase(Locale.ROOT) + "%";
+            countPredicates.add(cb.or(
+                    cb.like(cb.lower(countRoot.get("name")), like),
+                    cb.like(cb.lower(countRoot.get("projectCode")), like)
+            ));
+        }
+        if (status != null) {
+            countPredicates.add(cb.equal(countRoot.get("status"), status));
+        }
+        if (type != null) {
+            countPredicates.add(cb.equal(countRoot.get("type"), type));
+        }
+        if (managerId != null) {
+            countPredicates.add(cb.equal(countRoot.get("managerId"), managerId));
+        }
+        if (active != null) {
+            countPredicates.add(cb.equal(countRoot.get("active"), active));
+        }
+        if (startDateFrom != null) {
+            countPredicates.add(cb.greaterThanOrEqualTo(countRoot.get("startDate"), startDateFrom));
+        }
+        if (startDateTo != null) {
+            countPredicates.add(cb.lessThanOrEqualTo(countRoot.get("startDate"), startDateTo));
+        }
+        countQuery.select(cb.count(countRoot)).where(countPredicates.toArray(new Predicate[0]));
         Long total = entityManager.createQuery(countQuery).getSingleResult();
 
         return new org.springframework.data.domain.PageImpl<>(
-                results.stream().map(this::buildProjectDTO).toList(),
+                results.stream().map(this::buildProjectDTO).collect(Collectors.toList()),
                 pageable,
                 total
         );
@@ -188,10 +216,10 @@ public class ProjectService {
     @Transactional
     public ProjectDTO updateProject(Long projectId, CreateProjectRequestDTO request) {
         log.info("Updating project with ID: {}", projectId);
-        
+
         ProjectModel project = projectRepository.findById(projectId)
-            .orElseThrow(() -> new HltCustomerException(ErrorCode.PROJECT_NOT_FOUND));
-        
+                .orElseThrow(() -> new HltCustomerException(ErrorCode.PROJECT_NOT_FOUND));
+
         if (request.getName() != null) {
             project.setName(request.getName());
         }
@@ -201,40 +229,52 @@ public class ProjectService {
         if (request.getManagerId() != null) {
             project.setManagerId(request.getManagerId());
         }
-        
+
         project = projectRepository.save(project);
-        
+
         log.info("Project updated successfully: {}", projectId);
-        
+
         return buildProjectDTO(project);
     }
 
     @Transactional
     public void deactivateProject(Long projectId) {
         log.info("Deactivating project with ID: {}", projectId);
-        
+
         ProjectModel project = projectRepository.findById(projectId)
-            .orElseThrow(() -> new HltCustomerException(ErrorCode.PROJECT_NOT_FOUND));
-        
+                .orElseThrow(() -> new HltCustomerException(ErrorCode.PROJECT_NOT_FOUND));
+
         project.setActive(false);
         projectRepository.save(project);
-        
+
         log.info("Project deactivated successfully: {}", projectId);
     }
 
     private ProjectDTO buildProjectDTO(ProjectModel project) {
         return ProjectDTO.builder()
-            .id(project.getId())
-            .organizationId(project.getOrganizationId())
-            .name(project.getName())
-            .projectCode(project.getProjectCode())
-            .description(project.getDescription())
-            .managerId(project.getManagerId())
-            .active(project.getActive())
-            .createdAt(project.getCreatedAt())
-            .updatedAt(project.getUpdatedAt())
-            .memberCount(project.getMembers() != null ? project.getMembers().size() : 0)
-            .ticketCount(project.getTickets() != null ? project.getTickets().size() : 0)
-            .build();
+                .id(project.getId())
+                .organizationId(project.getOrganizationId())
+                .name(project.getName())
+                .projectCode(project.getProjectCode())
+                .description(project.getDescription())
+                .managerId(project.getManagerId())
+                .active(project.getActive())
+                .status(project.getStatus())
+                .type(project.getType())
+                .startDate(project.getStartDate())
+                .endDate(project.getEndDate())
+                .targetEndDate(project.getTargetEndDate())
+                .dueDate(project.getDueDate())
+                .ownerOrganizationId(project.getOwnerOrganizationId())
+                .clientOrganizationId(project.getClientOrganizationId())
+                .clientId(project.getClientId())
+                .progressPercentage(project.getProgressPercentage())
+                .createdAt(project.getCreatedAt())
+                .updatedAt(project.getUpdatedAt())
+                .memberCount(project.getMembers() != null ? project.getMembers().size() : 0)
+                .ticketCount(project.getTickets() != null ? project.getTickets().size() : 0)
+                .build();
     }
+
 }
+

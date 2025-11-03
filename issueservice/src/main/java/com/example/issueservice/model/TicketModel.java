@@ -37,6 +37,9 @@ public class TicketModel {
     
     @Column(nullable = false, unique = true, length = 50)
     private String ticketNumber;  // e.g., "PROJ-1234"
+
+    @Column(nullable = false, unique = true, length = 30)
+    private String ticketCode; // e.g., TCK-2025-0001
     
     @Column(nullable = false)
     private Long organizationId;
@@ -67,6 +70,49 @@ public class TicketModel {
     
     @Column(length = 200)
     private String requestContact;  // Email/Phone of requester
+
+    // New classification fields
+    @Column(length = 100)
+    private String issueType; // Bug, Incident, Service Request, Change
+
+    @Column(length = 20)
+    private String impact; // Low, Medium, High
+
+    @Column(length = 20)
+    private String urgency; // Low, Medium, High, Critical
+
+    @Column(length = 4)
+    private String priorityCode; // P1..P4 computed from matrix
+
+    @Column(length = 50)
+    private String slaType; // Standard, Enterprise, 24x7
+
+    @Column
+    private Integer responseSlaHours;
+
+    @Column
+    private Integer resolutionSlaHours;
+
+    @Column
+    private Instant slaResponseDueAt;
+
+    @Column
+    private Instant slaResolutionDueAt;
+
+    @Column
+    private Boolean slaBreached = false;
+
+    @Column
+    private Boolean slaPaused = false;
+
+    @Column
+    private Instant slaBreachedAt;
+
+    @Column
+    private Long slaResponseRemainingSeconds; // used when paused
+
+    @Column
+    private Long slaResolutionRemainingSeconds; // used when paused
     
     @Column
     private Long clientId;  // Reference to ClientModel if created by client

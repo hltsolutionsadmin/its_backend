@@ -32,6 +32,7 @@ public class TicketService {
     private final CommentRepository commentRepository;
     private final TicketHistoryRepository historyRepository;
     private final GroupRepository groupRepository;
+    private final GroupHistoryRepository groupHistoryRepository;
     private final CategoryRepository categoryRepository;
 
     @Transactional
@@ -47,20 +48,40 @@ public class TicketService {
         
         // Generate ticket number
         String ticketNumber = generateTicketNumber(project.getProjectCode());
+        String ticketCode = generateTicketCode();
         
         TicketModel ticket = new TicketModel();
         ticket.setTicketNumber(ticketNumber);
+        ticket.setTicketCode(ticketCode);
         ticket.setOrganizationId(orgId);
         ticket.setProject(project);
         ticket.setTitle(request.getTitle());
         ticket.setDescription(request.getDescription());
-        ticket.setPriority(request.getPriority());
+        // classification fields
+        ticket.setIssueType(request.getIssueType());
+        ticket.setImpact(request.getImpact());
+        ticket.setUrgency(request.getUrgency());
+        ticket.setSlaType(request.getSlaType());
+        // compute priority code from impact x urgency
+        String priorityCode = computePriorityCode(request.getImpact(), request.getUrgency());
+        ticket.setPriorityCode(priorityCode);
+        // map P1..P4 to TicketPriority enum for backward compatibility
+        ticket.setPriority(mapPriorityEnum(priorityCode));
         ticket.setReporterId(reporterId);
         ticket.setRequestName(request.getRequestName());
         ticket.setRequestContact(request.getRequestContact());
         ticket.setClientId(request.getClientId());
         ticket.setAssetId(request.getAssetId());
         ticket.setStatus(TicketStatus.NEW);
+        // SLA hours and due timestamps
+        int[] sla = getSlaHours(priorityCode);
+        ticket.setResponseSlaHours(sla[0]);
+        ticket.setResolutionSlaHours(sla[1]);
+        Instant now = Instant.now();
+        ticket.setSlaResponseDueAt(now.plusSeconds(sla[0] * 3600L));
+        ticket.setSlaResolutionDueAt(now.plusSeconds(sla[1] * 3600L));
+        ticket.setSlaBreached(false);
+        ticket.setSlaPaused(false);
         
         // Set category if provided
         if (request.getCategoryId() != null) {
@@ -119,6 +140,20 @@ public class TicketService {
             ticket.setAssignmentType(AssignmentType.GROUP);
             ticket.setAssignedGroupId(request.getGroupId());
             ticket.setAssignedUserId(null);
+            // Record group history if group changed
+            Long previousGroupId = null;
+            if (oldValue != null && oldValue.startsWith("Group:")) {
+                try { previousGroupId = Long.parseLong(oldValue.substring("Group:".length())); } catch (Exception ignored) {}
+            }
+            if (previousGroupId == null || !previousGroupId.equals(request.getGroupId())) {
+                GroupHistoryModel gh = new GroupHistoryModel();
+                gh.setTicket(ticket);
+                gh.setFromGroupId(previousGroupId);
+                gh.setToGroupId(request.getGroupId());
+                gh.setChangedBy(assignerId);
+                gh.setNote(request.getNote());
+                groupHistoryRepository.save(gh);
+            }
         }
         
         ticketRepository.save(ticket);
@@ -138,8 +173,45 @@ public class TicketService {
         
         TicketStatus oldStatus = ticket.getStatus();
         ticket.setStatus(request.getStatus());
-        
-        // Update timestamps based on status
+
+        // SLA pause/resume handling
+        boolean isPausing = request.getStatus() == TicketStatus.ON_HOLD || request.getStatus() == TicketStatus.AWAITING_USER_INFO;
+        boolean wasPaused = Boolean.TRUE.equals(ticket.getSlaPaused());
+        if (isPausing && !wasPaused) {
+            // compute remaining seconds and clear due timestamps
+            Instant now = Instant.now();
+            if (ticket.getSlaResponseDueAt() != null) {
+                long remaining = Math.max(0, ticket.getSlaResponseDueAt().getEpochSecond() - now.getEpochSecond());
+                ticket.setSlaResponseRemainingSeconds(remaining);
+            }
+            if (ticket.getSlaResolutionDueAt() != null) {
+                long remaining = Math.max(0, ticket.getSlaResolutionDueAt().getEpochSecond() - now.getEpochSecond());
+                ticket.setSlaResolutionRemainingSeconds(remaining);
+            }
+            ticket.setSlaPaused(true);
+            ticket.setSlaResponseDueAt(null);
+            ticket.setSlaResolutionDueAt(null);
+        } else if (!isPausing && wasPaused) {
+            // resume: recompute due timestamps from now using remaining seconds if present, else SLA hours
+            Instant now = Instant.now();
+            Long respRem = ticket.getSlaResponseRemainingSeconds();
+            Long resoRem = ticket.getSlaResolutionRemainingSeconds();
+            if (respRem != null && respRem > 0) {
+                ticket.setSlaResponseDueAt(now.plusSeconds(respRem));
+            } else if (ticket.getResponseSlaHours() != null) {
+                ticket.setSlaResponseDueAt(now.plusSeconds(ticket.getResponseSlaHours() * 3600L));
+            }
+            if (resoRem != null && resoRem > 0) {
+                ticket.setSlaResolutionDueAt(now.plusSeconds(resoRem));
+            } else if (ticket.getResolutionSlaHours() != null) {
+                ticket.setSlaResolutionDueAt(now.plusSeconds(ticket.getResolutionSlaHours() * 3600L));
+            }
+            ticket.setSlaPaused(false);
+            ticket.setSlaResponseRemainingSeconds(null);
+            ticket.setSlaResolutionRemainingSeconds(null);
+        }
+
+        // Update timestamps based on terminal statuses
         if (request.getStatus() == TicketStatus.RESOLVED && ticket.getResolvedAt() == null) {
             ticket.setResolvedAt(Instant.now());
         }
@@ -218,6 +290,59 @@ public class TicketService {
         // Simple implementation - in production, use sequence or counter
         long count = ticketRepository.count() + 1;
         return projectCode + "-" + count;
+    }
+
+    private String generateTicketCode() {
+        java.time.ZonedDateTime zdt = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC);
+        int year = zdt.getYear();
+        long seq = ticketRepository.count() + 1; // simplistic; replace with sequence table for concurrency safety
+        return String.format("TCK-%d-%04d", year, seq % 10000);
+    }
+
+    private String computePriorityCode(String impactRaw, String urgencyRaw) {
+        if (impactRaw == null || urgencyRaw == null) return "P3";
+        String impact = impactRaw.trim().toUpperCase();
+        String urgency = urgencyRaw.trim().toUpperCase();
+        // normalize
+        switch (impact) { case "LOW": case "MEDIUM": case "HIGH": break; default: impact = "MEDIUM"; }
+        switch (urgency) { case "LOW": case "MEDIUM": case "HIGH": case "CRITICAL": break; default: urgency = "MEDIUM"; }
+        if (impact.equals("LOW")) {
+            if (urgency.equals("LOW")) return "P4";
+            if (urgency.equals("MEDIUM")) return "P3";
+            if (urgency.equals("HIGH")) return "P3";
+            return "P2"; // CRITICAL
+        } else if (impact.equals("MEDIUM")) {
+            if (urgency.equals("LOW")) return "P3";
+            if (urgency.equals("MEDIUM")) return "P3";
+            if (urgency.equals("HIGH")) return "P2";
+            return "P1"; // CRITICAL
+        } else { // HIGH
+            if (urgency.equals("LOW")) return "P2";
+            if (urgency.equals("MEDIUM")) return "P2";
+            return "P1"; // HIGH or CRITICAL
+        }
+    }
+
+    private int[] getSlaHours(String priorityCode) {
+        if (priorityCode == null) return new int[]{4,8};
+        switch (priorityCode) {
+            case "P1": return new int[]{1,2};
+            case "P2": return new int[]{2,4};
+            case "P3": return new int[]{4,8};
+            case "P4": return new int[]{6,12};
+            default: return new int[]{4,8};
+        }
+    }
+
+    private com.its.commonservice.enums.TicketPriority mapPriorityEnum(String code) {
+        if (code == null) return com.its.commonservice.enums.TicketPriority.MEDIUM;
+        switch (code) {
+            case "P1": return com.its.commonservice.enums.TicketPriority.CRITICAL;
+            case "P2": return com.its.commonservice.enums.TicketPriority.HIGH;
+            case "P3": return com.its.commonservice.enums.TicketPriority.MEDIUM;
+            case "P4": return com.its.commonservice.enums.TicketPriority.LOW;
+            default: return com.its.commonservice.enums.TicketPriority.MEDIUM;
+        }
     }
 
     private String formatAssignment(AssignmentType type, Long userId, Long groupId) {

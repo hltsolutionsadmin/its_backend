@@ -1,5 +1,7 @@
 package com.example.issueservice.dto;
 
+import com.example.issueservice.enums.ProjectStatus;
+import com.example.issueservice.enums.ProjectType;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -18,8 +21,6 @@ public class CreateProjectRequestDTO {
     @Size(min = 2, max = 200)
     private String name;
     
-    // Optional: if not provided, backend will auto-generate a unique code
-    @Size(min = 2, max = 20)
     @Pattern(regexp = "^[A-Z0-9_]+$", message = "Project code must contain only uppercase letters, numbers, and underscores")
     private String projectCode;
     
@@ -29,4 +30,15 @@ public class CreateProjectRequestDTO {
     @NotNull(message = "Manager ID is required")
     @JsonAlias({"projectManagerId"})
     private Long managerId;
+
+    private ProjectStatus status;
+    private ProjectType type;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private LocalDate targetEndDate;
+    private LocalDate dueDate;
+    private Long ownerOrganizationId;
+    private Long clientOrganizationId;
+    private Long clientId;
+    private Integer progressPercentage;
 }
