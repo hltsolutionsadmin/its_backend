@@ -6,6 +6,7 @@ import com.example.issueservice.model.ProjectModel;
 import com.example.issueservice.repository.ProjectRepository;
 import com.example.issueservice.enums.ProjectStatus;
 import com.example.issueservice.enums.ProjectType;
+import com.example.issueservice.utils.ProjectCodeGenerator;
 import com.its.commonservice.exception.ErrorCode;
 import com.its.commonservice.exception.HltCustomerException;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,8 @@ import java.util.Locale;
 public class ProjectService {
     private final ProjectRepository projectRepository;
 
+    private final ProjectCodeGenerator ProjectCodeGenerator;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -54,7 +57,7 @@ public class ProjectService {
         ProjectModel project = new ProjectModel();
         project.setOrganizationId(orgId);
         project.setName(request.getName());
-        project.setProjectCode(code);
+        project.setProjectCode(ProjectCodeGenerator.generateCode(request.getName()));
         project.setDescription(request.getDescription());
         project.setManagerId(request.getManagerId());
         project.setActive(true);

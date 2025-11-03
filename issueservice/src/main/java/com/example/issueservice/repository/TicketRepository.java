@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Repository
@@ -33,9 +34,15 @@ public interface TicketRepository extends JpaRepository<TicketModel, Long> {
     
     @Query("SELECT t FROM TicketModel t WHERE t.project.id = :projectId AND " +
            "(LOWER(t.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(t.ticketNumber) LIKE LOWER(CONCAT('%', :search, '%')))")
+           "LOWER(t.ticketNumber) LIKE LOWER(CONCAT('%', :search, '%')))" )
     Page<TicketModel> searchByProject(@Param("projectId") Long projectId, @Param("search") String search, Pageable pageable);
     
     @Query("SELECT COUNT(t) FROM TicketModel t WHERE t.project.id = :projectId AND t.status = :status")
     long countByProjectAndStatus(@Param("projectId") Long projectId, @Param("status") TicketStatus status);
+
+    @Query("SELECT t FROM TicketModel t WHERE t.slaBreached = false AND (t.slaPaused IS NULL OR t.slaPaused = false) AND " +
+           "( (t.slaResponseDueAt IS NOT NULL AND t.slaResponseDueAt < :now) OR " +
+           "  (t.slaResolutionDueAt IS NOT NULL AND t.slaResolutionDueAt < :now) ) AND " +
+           "t.status NOT IN (com.its.commonservice.enums.TicketStatus.CLOSED, com.its.commonservice.enums.TicketStatus.RESOLVED)")
+    java.util.List<TicketModel> findOverdueSlaTickets(@Param("now") Instant now);
 }

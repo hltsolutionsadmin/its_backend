@@ -20,7 +20,7 @@ public class CreateTicketRequestDTO {
     @Size(max = 5000)
     private String description;
     
-    @NotNull(message = "Priority is required")
+    // Legacy priority (optional now); if null, computed from impact/urgency
     private TicketPriority priority;
     
     @Size(max = 200)
@@ -36,4 +36,17 @@ public class CreateTicketRequestDTO {
     private Long clientId;
     
     private Long assetId;
+    
+    // New fields per spec
+    @Size(max = 50)
+    private String issueType; // Bug, Incident, Service Request, Change
+    
+    @Size(max = 20)
+    private String impact; // Low, Medium, High
+    
+    @Size(max = 20)
+    private String urgency; // Low, Medium, High, Critical
+    
+    @Size(max = 50)
+    private String slaType; // Standard, Enterprise, 24x7
 }

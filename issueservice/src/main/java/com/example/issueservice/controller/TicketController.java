@@ -114,6 +114,29 @@ public class TicketController {
     }
 
     /**
+     * Add internal work note
+     * POST /api/orgs/{orgId}/tickets/{ticketId}/worknotes
+     */
+    @PostMapping("/{ticketId}/worknotes")
+    public StandardResponse<WorkNoteDTO> addWorkNote(
+            @PathVariable Long ticketId,
+            @Valid @RequestBody AddWorkNoteRequestDTO request,
+            @RequestAttribute("userId") Long userId) {
+        WorkNoteDTO note = ticketService.addWorkNote(ticketId, request, userId);
+        return StandardResponse.single(note, "Work note added successfully");
+    }
+
+    /**
+     * Get work notes
+     * GET /api/orgs/{orgId}/tickets/{ticketId}/worknotes
+     */
+    @GetMapping("/{ticketId}/worknotes")
+    public StandardResponse<WorkNoteDTO> getWorkNotes(@PathVariable Long ticketId) {
+        List<WorkNoteDTO> notes = ticketService.getWorkNotes(ticketId);
+        return StandardResponse.list(notes);
+    }
+
+    /**
      * Get ticket history
      * GET /api/orgs/{orgId}/tickets/{ticketId}/history
      */
