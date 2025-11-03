@@ -8,17 +8,17 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
+/**
+ * Internal work notes vs public comments
+ */
 @Entity
-@Table(
-    name = "group_history",
-    indexes = {
-        @Index(name = "idx_ticket_group_hist", columnList = "ticket_id,changedAt")
-    }
-)
+@Table(name = "work_notes", indexes = {
+        @Index(name = "idx_work_note_ticket", columnList = "ticket_id,createdAt")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupHistoryModel {
+public class WorkNoteModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,19 +28,16 @@ public class GroupHistoryModel {
     @JoinColumn(name = "ticket_id", nullable = false)
     private TicketModel ticket;
 
-    @Column(name = "from_group_id")
-    private Long fromGroupId;
-
-    @Column(name = "to_group_id")
-    private Long toGroupId;
-
-    @Column(name = "changed_by")
-    private Long changedBy;
-
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String note;
 
+    @Column(nullable = false)
+    private Long createdBy;
+
     @CreationTimestamp
-    @Column(name = "changed_at", nullable = false, updatable = false)
-    private Instant changedAt;
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(nullable = false)
+    private Boolean internalNote = true; // true: internal work note, false: public comment
 }

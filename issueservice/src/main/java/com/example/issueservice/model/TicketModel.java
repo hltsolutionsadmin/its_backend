@@ -20,6 +20,7 @@ import java.util.List;
 @Entity
 @Table(name = "tickets", indexes = {
     @Index(name = "idx_ticket_number", columnList = "ticketNumber", unique = true),
+    @Index(name = "idx_ticket_code", columnList = "ticketCode", unique = true),
     @Index(name = "idx_org_ticket", columnList = "organizationId,ticketNumber"),
     @Index(name = "idx_project_ticket", columnList = "project_id"),
     @Index(name = "idx_status", columnList = "status"),
@@ -41,6 +42,9 @@ public class TicketModel {
     @Column(nullable = false, unique = true, length = 30)
     private String ticketCode; // e.g., TCK-2025-0001
     
+    @Column(nullable = false, unique = true, length = 50)
+    private String ticketCode;
+    
     @Column(nullable = false)
     private Long organizationId;
     
@@ -54,14 +58,26 @@ public class TicketModel {
     @Column(columnDefinition = "TEXT")
     private String description;
     
+    @Column(length = 50)
+    private String issueType; // Bug, Incident, Service Request, Change
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private TicketStatus status = TicketStatus.NEW;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private TicketPriority priority = TicketPriority.MEDIUM;
+    private TicketPriority priority = TicketPriority.MEDIUM; // Legacy field
     
+    // New priority level derived from impact x urgency matrix: P1..P4
+    @Column(length = 5)
+    private String priorityLevel;
+    
+    // Impact and urgency used to compute priority level
+    @Column(length = 20)
+    private String impact;   // Low, Medium, High
+    
+    @Column(length = 20)
+    private String urgency;  // Low, Medium, High, Critical
     @Column(nullable = false)
     private Long reporterId;  // User who created the ticket
     
@@ -140,13 +156,29 @@ public class TicketModel {
     private Long assetId;  // Optional asset reference
     
     @Column
-    private Instant dueDate;
-    
+    private Instant dueDate; // Legacy due field
     @Column
     private Instant resolvedAt;
-    
     @Column
     private Instant closedAt;
+
+    // SLA fields
+    @Column(length = 50)
+    private String slaType; // Standard, Enterprise, 24x7
+    
+    private Integer responseSlaHours;
+    private Integer resolutionSlaHours;
+    
+    private Instant slaResponseDueAt;
+    private Instant slaResolutionDueAt;
+    
+    private Boolean slaBreached = false;
+    private Instant slaBreachedAt;
+    private Boolean slaPaused = false;
+    
+    // Remaining time in seconds when paused
+    private Long slaRemainingResponseSeconds;
+    private Long slaRemainingResolutionSeconds;
     
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

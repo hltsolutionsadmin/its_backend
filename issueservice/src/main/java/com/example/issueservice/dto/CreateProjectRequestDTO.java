@@ -12,6 +12,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
+import com.example.issueservice.enums.ProjectStatus;
+import com.example.issueservice.enums.ProjectType;
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,6 +34,7 @@ public class CreateProjectRequestDTO {
     @NotNull(message = "Manager ID is required")
     @JsonAlias({"projectManagerId"})
     private Long managerId;
+
 
     private ProjectStatus status;
     private ProjectType type;
