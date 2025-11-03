@@ -3,6 +3,10 @@ package com.example.issueservice.model;
 import com.its.commonservice.enums.AssignmentType;
 import com.its.commonservice.enums.TicketPriority;
 import com.its.commonservice.enums.TicketStatus;
+import com.its.commonservice.enums.Impact;
+import com.its.commonservice.enums.Urgency;
+import com.its.commonservice.enums.IssueType;
+import com.its.commonservice.enums.SlaType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,9 +43,6 @@ public class TicketModel {
     @Column(nullable = false, unique = true, length = 50)
     private String ticketNumber;  // e.g., "PROJ-1234"
 
-    @Column(nullable = false, unique = true, length = 30)
-    private String ticketCode; // e.g., TCK-2025-0001
-    
     @Column(nullable = false, unique = true, length = 50)
     private String ticketCode;
     
@@ -58,8 +59,9 @@ public class TicketModel {
     @Column(columnDefinition = "TEXT")
     private String description;
     
+    @Enumerated(EnumType.STRING)
     @Column(length = 50)
-    private String issueType; // Bug, Incident, Service Request, Change
+    private IssueType issueType; // Bug, Incident, Service Request, Change
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private TicketStatus status = TicketStatus.NEW;
@@ -73,11 +75,13 @@ public class TicketModel {
     private String priorityLevel;
     
     // Impact and urgency used to compute priority level
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private String impact;   // Low, Medium, High
+    private Impact impact;   // Low, Medium, High
     
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private String urgency;  // Low, Medium, High, Critical
+    private Urgency urgency;  // Low, Medium, High, Critical
     @Column(nullable = false)
     private Long reporterId;  // User who created the ticket
     
@@ -87,21 +91,12 @@ public class TicketModel {
     @Column(length = 200)
     private String requestContact;  // Email/Phone of requester
 
-    // New classification fields
-    @Column(length = 100)
-    private String issueType; // Bug, Incident, Service Request, Change
-
-    @Column(length = 20)
-    private String impact; // Low, Medium, High
-
-    @Column(length = 20)
-    private String urgency; // Low, Medium, High, Critical
-
     @Column(length = 4)
     private String priorityCode; // P1..P4 computed from matrix
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 50)
-    private String slaType; // Standard, Enterprise, 24x7
+    private SlaType slaType; // Standard, Enterprise, 24x7
 
     @Column
     private Integer responseSlaHours;
@@ -161,20 +156,6 @@ public class TicketModel {
     private Instant resolvedAt;
     @Column
     private Instant closedAt;
-
-    // SLA fields
-    @Column(length = 50)
-    private String slaType; // Standard, Enterprise, 24x7
-    
-    private Integer responseSlaHours;
-    private Integer resolutionSlaHours;
-    
-    private Instant slaResponseDueAt;
-    private Instant slaResolutionDueAt;
-    
-    private Boolean slaBreached = false;
-    private Instant slaBreachedAt;
-    private Boolean slaPaused = false;
     
     // Remaining time in seconds when paused
     private Long slaRemainingResponseSeconds;
