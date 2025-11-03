@@ -1,15 +1,14 @@
 package com.example.issueservice.dto;
 
-import com.juvarya.commonservice.enums.AssignmentType;
-import com.juvarya.commonservice.enums.TicketPriority;
-import com.juvarya.commonservice.enums.TicketStatus;
+import com.its.commonservice.enums.AssignmentType;
+import com.its.commonservice.enums.TicketPriority;
+import com.its.commonservice.enums.TicketStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.util.List;
 
 @Data
 @NoArgsConstructor

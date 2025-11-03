@@ -1,6 +1,6 @@
 package com.example.issueservice.model;
 
-import com.juvarya.commonservice.enums.CommentType;
+import com.its.commonservice.enums.CommentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

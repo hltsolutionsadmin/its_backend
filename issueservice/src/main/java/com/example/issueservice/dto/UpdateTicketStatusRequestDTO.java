@@ -1,6 +1,6 @@
 package com.example.issueservice.dto;
 
-import com.juvarya.commonservice.enums.TicketStatus;
+import com.its.commonservice.enums.TicketStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

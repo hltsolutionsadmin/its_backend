@@ -3,7 +3,7 @@ package com.example.issueservice.controller;
 import com.example.issueservice.dto.CreateGroupRequestDTO;
 import com.example.issueservice.dto.GroupDTO;
 import com.example.issueservice.service.GroupService;
-import com.juvarya.commonservice.dto.StandardResponse;
+import com.its.commonservice.dto.StandardResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

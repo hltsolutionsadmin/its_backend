@@ -1,6 +1,6 @@
 package com.example.issueservice.dto;
 
-import com.juvarya.commonservice.enums.TicketPriority;
+import com.its.commonservice.enums.TicketPriority;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

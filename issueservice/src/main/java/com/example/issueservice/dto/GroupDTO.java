@@ -1,6 +1,6 @@
 package com.example.issueservice.dto;
 
-import com.juvarya.commonservice.enums.GroupLevel;
+import com.its.commonservice.enums.GroupLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

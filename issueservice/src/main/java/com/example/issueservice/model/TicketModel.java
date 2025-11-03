@@ -1,8 +1,8 @@
 package com.example.issueservice.model;
 
-import com.juvarya.commonservice.enums.AssignmentType;
-import com.juvarya.commonservice.enums.TicketPriority;
-import com.juvarya.commonservice.enums.TicketStatus;
+import com.its.commonservice.enums.AssignmentType;
+import com.its.commonservice.enums.TicketPriority;
+import com.its.commonservice.enums.TicketStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

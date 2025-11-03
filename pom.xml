@@ -23,7 +23,7 @@
         <module>apigateway</module>
         <module>authservice</module>
         <module>userservice</module>
-        <module>projectservice</module>
+<!--        <module>projectservice</module>-->
         <module>issueservice</module>
         <module>notificationservice</module>
     </modules>

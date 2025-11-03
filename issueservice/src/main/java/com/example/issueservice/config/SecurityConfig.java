@@ -1,6 +1,5 @@
 package com.example.issueservice.config;
 
-import com.juvarya.commonservice.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

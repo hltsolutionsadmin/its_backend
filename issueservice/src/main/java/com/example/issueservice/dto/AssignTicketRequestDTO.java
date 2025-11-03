@@ -1,6 +1,6 @@
 package com.example.issueservice.dto;
 
-import com.juvarya.commonservice.enums.AssignmentType;
+import com.its.commonservice.enums.AssignmentType;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;

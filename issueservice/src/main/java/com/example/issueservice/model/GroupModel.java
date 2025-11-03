@@ -1,6 +1,6 @@
 package com.example.issueservice.model;
 
-import com.juvarya.commonservice.enums.GroupLevel;
+import com.its.commonservice.enums.GroupLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

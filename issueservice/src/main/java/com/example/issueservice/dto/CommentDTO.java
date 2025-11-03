@@ -1,6 +1,6 @@
 package com.example.issueservice.dto;
 
-import com.juvarya.commonservice.enums.CommentType;
+import com.its.commonservice.enums.CommentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

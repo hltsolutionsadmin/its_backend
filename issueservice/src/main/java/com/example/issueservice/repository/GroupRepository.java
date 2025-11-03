@@ -1,7 +1,7 @@
 package com.example.issueservice.repository;
 
 import com.example.issueservice.model.GroupModel;
-import com.juvarya.commonservice.enums.GroupLevel;
+import com.its.commonservice.enums.GroupLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -3,7 +3,7 @@ package com.example.issueservice.controller;
 import com.example.issueservice.dto.ClientDTO;
 import com.example.issueservice.dto.CreateClientRequestDTO;
 import com.example.issueservice.service.ClientService;
-import com.juvarya.commonservice.dto.StandardResponse;
+import com.its.commonservice.dto.StandardResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
