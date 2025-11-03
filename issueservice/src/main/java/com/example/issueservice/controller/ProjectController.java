@@ -23,18 +23,18 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping
-    public StandardResponse<ProjectDTO> createProject(
-            @PathVariable Long orgId,
-            @Valid @RequestBody CreateProjectRequestDTO request) {
-        
-        ProjectDTO project = projectService.createProject(orgId, request);
-        return StandardResponse.single(project, "Project created successfully");
-    }
+        @PostMapping()
+        public StandardResponse<ProjectDTO> createProject(
+                @PathVariable("orgId") Long orgId,
+                @Valid @RequestBody CreateProjectRequestDTO request) {
+
+            ProjectDTO project = projectService.createProject(orgId, request);
+            return StandardResponse.single(project, "Project created successfully");
+        }
 
     @GetMapping
     public StandardResponse<ProjectDTO> getProjects(
-            @PathVariable Long orgId,
+            @PathVariable("orgId") Long orgId,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) ProjectType type,
@@ -51,14 +51,14 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}")
-    public StandardResponse<ProjectDTO> getProject(@PathVariable Long projectId) {
+    public StandardResponse<ProjectDTO> getProject(@PathVariable("projectId") Long projectId) {
         ProjectDTO project = projectService.getProjectById(projectId);
         return StandardResponse.single(project);
     }
 
     @PutMapping("/{projectId}")
     public StandardResponse<ProjectDTO> updateProject(
-            @PathVariable Long projectId,
+            @PathVariable("projectId") Long projectId,
             @Valid @RequestBody CreateProjectRequestDTO request) {
         
         ProjectDTO project = projectService.updateProject(projectId, request);
@@ -66,7 +66,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{projectId}")
-    public StandardResponse<Void> deactivateProject(@PathVariable Long projectId) {
+    public StandardResponse<Void> deactivateProject(@PathVariable("projectId") Long projectId) {
         projectService.deactivateProject(projectId);
         return StandardResponse.single(null, "Project deactivated successfully");
     }

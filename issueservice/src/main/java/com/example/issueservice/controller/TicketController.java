@@ -28,8 +28,8 @@ public class TicketController {
      */
     @PostMapping
     public StandardResponse<TicketDTO> createTicket(
-            @PathVariable Long orgId,
-            @PathVariable Long projectId,
+            @PathVariable("orgId") Long orgId,
+            @PathVariable("projectId") Long projectId,
             @Valid @RequestBody CreateTicketRequestDTO request,
             @RequestAttribute("userId") Long userId) {
         
@@ -43,8 +43,8 @@ public class TicketController {
      */
     @GetMapping
     public StandardResponse<TicketDTO> getProjectTickets(
-            @PathVariable Long orgId,
-            @PathVariable Long projectId,
+            @PathVariable("orgId") Long orgId,
+            @PathVariable("projectId") Long projectId,
             Pageable pageable) {
         
         Page<TicketDTO> tickets = ticketService.getProjectTickets(projectId, pageable);
@@ -56,7 +56,7 @@ public class TicketController {
      * GET /api/orgs/{orgId}/tickets/{ticketId}
      */
     @GetMapping("/{ticketId}")
-    public StandardResponse<TicketDTO> getTicket(@PathVariable Long ticketId) {
+    public StandardResponse<TicketDTO> getTicket(@PathVariable("ticketId") Long ticketId) {
         TicketDTO ticket = ticketService.getTicketById(ticketId);
         return StandardResponse.single(ticket);
     }
@@ -67,7 +67,7 @@ public class TicketController {
      */
     @PostMapping("/{ticketId}/assign")
     public StandardResponse<Void> assignTicket(
-            @PathVariable Long ticketId,
+            @PathVariable("ticketId") Long ticketId,
             @Valid @RequestBody AssignTicketRequestDTO request,
             @RequestAttribute("userId") Long userId) {
         
@@ -81,7 +81,7 @@ public class TicketController {
      */
     @PostMapping("/{ticketId}/status")
     public StandardResponse<Void> updateStatus(
-            @PathVariable Long ticketId,
+            @PathVariable("ticketId") Long ticketId,
             @Valid @RequestBody UpdateTicketStatusRequestDTO request,
             @RequestAttribute("userId") Long userId) {
         
@@ -95,7 +95,7 @@ public class TicketController {
      */
     @PostMapping("/{ticketId}/comments")
     public StandardResponse<CommentDTO> addComment(
-            @PathVariable Long ticketId,
+            @PathVariable("ticketId") Long ticketId,
             @Valid @RequestBody AddCommentRequestDTO request,
             @RequestAttribute("userId") Long userId) {
         
@@ -108,7 +108,7 @@ public class TicketController {
      * GET /api/orgs/{orgId}/tickets/{ticketId}/comments
      */
     @GetMapping("/{ticketId}/comments")
-    public StandardResponse<CommentDTO> getComments(@PathVariable Long ticketId) {
+    public StandardResponse<CommentDTO> getComments(@PathVariable("ticketId") Long ticketId) {
         List<CommentDTO> comments = ticketService.getTicketComments(ticketId);
         return StandardResponse.list(comments);
     }
@@ -119,7 +119,7 @@ public class TicketController {
      */
     @PostMapping("/{ticketId}/worknotes")
     public StandardResponse<WorkNoteDTO> addWorkNote(
-            @PathVariable Long ticketId,
+            @PathVariable("ticketId") Long ticketId,
             @Valid @RequestBody AddWorkNoteRequestDTO request,
             @RequestAttribute("userId") Long userId) {
         WorkNoteDTO note = ticketService.addWorkNote(ticketId, request, userId);
@@ -131,7 +131,7 @@ public class TicketController {
      * GET /api/orgs/{orgId}/tickets/{ticketId}/worknotes
      */
     @GetMapping("/{ticketId}/worknotes")
-    public StandardResponse<WorkNoteDTO> getWorkNotes(@PathVariable Long ticketId) {
+    public StandardResponse<WorkNoteDTO> getWorkNotes(@PathVariable("ticketId") Long ticketId) {
         List<WorkNoteDTO> notes = ticketService.getWorkNotes(ticketId);
         return StandardResponse.list(notes);
     }
@@ -141,7 +141,7 @@ public class TicketController {
      * GET /api/orgs/{orgId}/tickets/{ticketId}/history
      */
     @GetMapping("/{ticketId}/history")
-    public StandardResponse<TicketHistoryDTO> getHistory(@PathVariable Long ticketId) {
+    public StandardResponse<TicketHistoryDTO> getHistory(@PathVariable("ticketId") Long ticketId) {
         List<TicketHistoryDTO> history = ticketService.getTicketHistory(ticketId);
         return StandardResponse.list(history);
     }
