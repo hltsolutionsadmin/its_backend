@@ -27,7 +27,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers(new AntPathRequestMatcher("/auth/**"))
+                .ignoringRequestMatchers(new AntPathRequestMatcher("/api/auth/**"))
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**", "/login", "/register", "/actuator/health").permitAll()

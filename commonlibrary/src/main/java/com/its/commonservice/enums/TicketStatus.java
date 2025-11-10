@@ -11,5 +11,6 @@ public enum TicketStatus {
     AWAITING_USER_INFO,
     RESOLVED,
     CLOSED,
-    CANCELLED
+    CANCELLED,
+    ASSIGNED
 }

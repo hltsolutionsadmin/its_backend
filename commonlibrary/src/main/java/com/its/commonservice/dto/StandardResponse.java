@@ -71,6 +71,15 @@ public class StandardResponse<T> {
         return response;
     }
     
+    // Message-only success response
+    public static <T> StandardResponse<T> message(String message) {
+        StandardResponse<T> response = new StandardResponse<>();
+        response.setSuccess(true);
+        response.setMessage(message);
+        response.setTimestamp(Instant.now());
+        return response;
+    }
+    
     // Paginated response
     public static <T> StandardResponse<T> page(Page<T> page) {
         StandardResponse<T> response = new StandardResponse<>();

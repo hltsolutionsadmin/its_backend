@@ -1,5 +1,6 @@
 package com.example.issueservice.model;
 
+import com.its.utils.LongListJsonConverter;
 import com.its.commonservice.enums.ProjectStatus;
 import com.its.commonservice.enums.ProjectType;
 import com.its.commonservice.enums.SlaTier;
@@ -9,7 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Where;
+
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -73,14 +74,21 @@ public class ProjectModel extends GenericModel {
     @Column(name = "CLIENT_ORG_ID")
     private Long clientOrganizationId;
 
-    @Column(name = "TICKET_IDS")
-    private List<Long> ticketsId = new ArrayList<>();
+    @Column(name = "TICKET_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
+    private List<Long> ticketIds = new ArrayList<>();
 
-    @Column(name = "USER_ASSIGNMENT_IDS")
+    @Column(name = "USER_ASSIGNMENT_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
     private List<Long> userAssignmentIds = new ArrayList<>();
 
-    @Column(name = "TECH_STACK_IDS")
+    @Column(name = "TECH_STACK_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
     private List<Long> technologyStackIds = new ArrayList<>();
+
+    @Column(name = "USER_GROUPS_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
+    private List<Long> userGroupIds = new ArrayList<>();
 
     @Column(nullable = true)
     private int progressPercentage = 0;
@@ -93,8 +101,5 @@ public class ProjectModel extends GenericModel {
 
     @Column(name = "ARCHIVED", nullable = false)
     private Boolean archived = false;
-
-    @Column(name = "USER_GROUPS_IDS")
-    private List<Long> userGroupIds = new ArrayList<>();
 
 }

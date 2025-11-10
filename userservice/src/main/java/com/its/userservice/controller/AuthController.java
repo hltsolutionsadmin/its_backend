@@ -1,5 +1,7 @@
 package com.its.userservice.controller;
 
+import com.its.commonservice.exception.ErrorCode;
+import com.its.commonservice.exception.HltCustomerException;
 import com.its.userservice.dto.*;
 import com.its.common.dto.UserDTO;
 import com.its.userservice.service.impl.AuthService;
@@ -78,7 +80,7 @@ public class AuthController {
         return StandardResponse.single(null, "Logged out successfully");
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/user/{userId}")
     public StandardResponse<UserDTO> getUserById(@PathVariable("userId") Long userId) {
         UserDTO user = userService.getUserById(userId);
         return StandardResponse.single(user);
@@ -94,9 +96,26 @@ public class AuthController {
 
     @GetMapping("/{orgId}")
     public StandardResponse<OrganizationDTO> getOrganization(
-            @PathVariable Long orgId,
-            @RequestAttribute("userId") Long userId) {
+            @PathVariable("orgId") Long orgId,
+            @RequestParam("userId") Long userId) {
+
         OrganizationDTO org = organizationService.getOrganizationById(orgId, userId);
         return StandardResponse.single(org);
+    }
+
+    @PostMapping("/roleAdd")
+    public StandardResponse<Void> addRole(
+            @RequestBody RoleDTO request) {
+        if (request.getRoleName() == null || request.getRoleName().isBlank()) {
+            throw new HltCustomerException(ErrorCode.INVALID_USER_ROLE);
+        }
+        organizationService.updateUserOrgRole(request.getOrgId(), request.getUserId(), request.getRoleName());
+        return StandardResponse.message("Role added successfully");
+    }
+
+    @PostMapping("/save")
+    public StandardResponse<UserDTO> saveUser(@RequestBody UserDTO user) {
+        UserDTO saved = userService.saveUser(user);
+        return StandardResponse.single(saved, "User created successfully");
     }
 }

@@ -30,7 +30,7 @@ public class OrganizationController {
     @PostMapping
     public StandardResponse<OrganizationDTO> createOrganization(
             @Valid @RequestBody CreateOrganizationRequestDTO request,
-            @RequestAttribute("userId") Long userId) {
+            @RequestParam("userId") Long userId) {
         
         OrganizationDTO org = organizationService.createOrganization(request, userId);
         return StandardResponse.single(org, "Organization created successfully");
@@ -43,8 +43,8 @@ public class OrganizationController {
     @GetMapping("/{orgId}")
     public StandardResponse<OrganizationDTO> getOrganization(
             @PathVariable Long orgId,
-            @RequestAttribute("userId") Long userId) {
-        
+            @RequestParam Long userId) {
+
         OrganizationDTO org = organizationService.getOrganizationById(orgId, userId);
         return StandardResponse.single(org);
     }

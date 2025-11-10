@@ -8,6 +8,7 @@ package com.its.commonservice.enums;
  * MEMBER: Regular member (can create tickets, comment, view assigned items)
  * CLIENT: External client who can create service requests
  */
+
 public enum UserRole {
     SUPER_ADMIN,
     ORG_ADMIN,
@@ -16,3 +17,4 @@ public enum UserRole {
     CLIENT,
     ORG_MEMBER
 }
+

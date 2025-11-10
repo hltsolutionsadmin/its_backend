@@ -69,10 +69,6 @@ public class UserController {
     @PostMapping("/roleAdd")
     public StandardResponse<Void> addRole(
             @RequestBody RoleDTO request) {
-        // Basic validations
-        if (request.getUserId() != null) {
-            throw new HltCustomerException(ErrorCode.INVALID_INPUT);
-        }
         if (request.getRoleName() == null || request.getRoleName().isBlank()) {
             throw new HltCustomerException(ErrorCode.INVALID_USER_ROLE);
         }
@@ -83,9 +79,6 @@ public class UserController {
     @PutMapping("/roleUpdate")
     public StandardResponse<Void> updateRole(
             @RequestBody RoleDTO request) {
-        if (request.getUserId() != null) {
-            throw new HltCustomerException(ErrorCode.INVALID_INPUT);
-        }
         if (request.getRoleName() == null || request.getRoleName().isBlank()) {
             throw new HltCustomerException(ErrorCode.INVALID_USER_ROLE);
         }
@@ -103,16 +96,4 @@ public class UserController {
         return StandardResponse.message("Role removed successfully");
     }
 
-    private UserRole parseRole(String roleName) {
-        try {
-            String normalized = roleName.trim().toUpperCase();
-            // Accept both with and without ROLE_ prefix
-            if (!normalized.startsWith("ROLE_") && normalized.length() > 0) {
-                normalized = "ROLE_" + normalized;
-            }
-            return UserRole.valueOf(normalized);
-        } catch (IllegalArgumentException ex) {
-            throw new HltCustomerException(ErrorCode.INVALID_USER_ROLE);
-        }
-    }
 }

@@ -1,5 +1,6 @@
 package com.its.userservice.model;
 
+import com.its.utils.LongListJsonConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,8 +29,8 @@ public class OrganizationModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false, unique = true, length = 200)
+
+    @Column(nullable = false, length = 200)
     private String name;
     
     @Column(nullable = false, unique = true, length = 20)
@@ -68,6 +69,8 @@ public class OrganizationModel {
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DepartmentModel> departments = new HashSet<>();
 
-    @Column(name = "PROJECT_IDS")
+    @Column(name = "PROJECT_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
     private List<Long> projectIds = new ArrayList<>();
+
 }
