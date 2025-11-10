@@ -3,7 +3,7 @@ package com.its.userservice.controller;
 import com.its.userservice.dto.CreateOrganizationRequestDTO;
 import com.its.userservice.dto.InviteUserRequestDTO;
 import com.its.userservice.dto.OrganizationDTO;
-import com.its.userservice.service.OrganizationService;
+import com.its.userservice.service.impl.OrganizationService;
 import com.its.commonservice.dto.StandardResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class OrganizationController {
     }
 
     /**
-     * Get organization by ID
+     * Get organizationgit by ID
      * GET /api/orgs/{orgId}
      */
     @GetMapping("/{orgId}")

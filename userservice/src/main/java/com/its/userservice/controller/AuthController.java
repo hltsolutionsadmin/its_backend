@@ -1,12 +1,11 @@
 package com.its.userservice.controller;
 
-import com.its.userservice.dto.AuthResponseDTO;
-import com.its.userservice.dto.LoginRequestDTO;
-import com.its.userservice.dto.EmailLoginRequestDTO;
-import com.its.userservice.dto.RegisterRequestDTO;
-import com.its.userservice.dto.UserDTO;
-import com.its.userservice.service.AuthService;
+import com.its.userservice.dto.*;
+import com.its.common.dto.UserDTO;
+import com.its.userservice.service.impl.AuthService;
 import com.its.commonservice.dto.StandardResponse;
+import com.its.userservice.service.impl.OrganizationService;
+import com.its.userservice.service.impl.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +20,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+
+    private final UserService userService;
+
+    private final OrganizationService organizationService;
+
 
     /**
      * Register a new user
@@ -72,5 +76,27 @@ public class AuthController {
     public StandardResponse<Void> logout(@RequestParam Long userId) {
         authService.logout(userId);
         return StandardResponse.single(null, "Logged out successfully");
+    }
+
+    @GetMapping("/{userId}")
+    public StandardResponse<UserDTO> getUserById(@PathVariable("userId") Long userId) {
+        UserDTO user = userService.getUserById(userId);
+        return StandardResponse.single(user);
+    }
+
+    @PostMapping("/orgs/{userId}")
+    public StandardResponse<OrganizationDTO> createOrganization(
+            @Valid @RequestBody CreateOrganizationRequestDTO request,
+            @PathVariable("userId") Long userId) {
+        OrganizationDTO org = organizationService.createOrganization(request, userId);
+        return StandardResponse.single(org, "Organization created successfully");
+    }
+
+    @GetMapping("/{orgId}")
+    public StandardResponse<OrganizationDTO> getOrganization(
+            @PathVariable Long orgId,
+            @RequestAttribute("userId") Long userId) {
+        OrganizationDTO org = organizationService.getOrganizationById(orgId, userId);
+        return StandardResponse.single(org);
     }
 }

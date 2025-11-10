@@ -1,10 +1,16 @@
 package com.its.userservice.controller;
 
-import com.its.userservice.dto.UserDTO;
-import com.its.userservice.service.UserService;
+import com.its.common.dto.UserDTO;
+import com.its.userservice.dto.RoleDTO;
+import com.its.userservice.model.OrganizationUserModel;
+import com.its.userservice.service.impl.OrganizationService;
+import com.its.userservice.service.impl.UserService;
+import com.its.userservice.service.impl.RoleService;
 import com.its.commonservice.dto.StandardResponse;
+import com.its.commonservice.enums.UserRole;
+import com.its.commonservice.exception.ErrorCode;
+import com.its.commonservice.exception.HltCustomerException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,31 +23,14 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final OrganizationService organizationService;
 
-    /**
-     * Get current user information
-     * GET /api/users/me
-     */
-    @GetMapping("/me")
-    public StandardResponse<UserDTO> getCurrentUser(@RequestAttribute("userId") Long userId) {
-        UserDTO user = userService.getUserById(userId);
-        return StandardResponse.single(user);
-    }
-
-    /**
-     * Get user by ID
-     * GET /api/users/{userId}
-     */
     @GetMapping("/{userId}")
-    public StandardResponse<UserDTO> getUserById(@PathVariable Long userId) {
+    public StandardResponse<UserDTO> getUserById(@PathVariable("userId") Long userId) {
         UserDTO user = userService.getUserById(userId);
         return StandardResponse.single(user);
     }
 
-    /**
-     * Update user profile
-     * PUT /api/users/{userId}
-     */
     @PutMapping("/{userId}")
     public StandardResponse<UserDTO> updateUser(
             @PathVariable Long userId,
@@ -62,9 +51,68 @@ public class UserController {
      * DELETE /api/users/{userId}
      */
     @DeleteMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public StandardResponse<Void> deactivateUser(@PathVariable Long userId) {
         userService.deactivateUser(userId);
         return StandardResponse.single(null, "User deactivated successfully");
+    }
+
+    /**
+     * Create a new user
+     * POST /api/users/save
+     */
+    @PostMapping("/save")
+    public StandardResponse<UserDTO> saveUser(@RequestBody UserDTO user) {
+        UserDTO saved = userService.saveUser(user);
+        return StandardResponse.single(saved, "User created successfully");
+    }
+
+    @PostMapping("/roleAdd")
+    public StandardResponse<Void> addRole(
+            @RequestBody RoleDTO request) {
+        // Basic validations
+        if (request.getUserId() != null) {
+            throw new HltCustomerException(ErrorCode.INVALID_INPUT);
+        }
+        if (request.getRoleName() == null || request.getRoleName().isBlank()) {
+            throw new HltCustomerException(ErrorCode.INVALID_USER_ROLE);
+        }
+        organizationService.updateUserOrgRole(request.getOrgId(), request.getUserId(), request.getRoleName());
+        return StandardResponse.message("Role added successfully");
+    }
+
+    @PutMapping("/roleUpdate")
+    public StandardResponse<Void> updateRole(
+            @RequestBody RoleDTO request) {
+        if (request.getUserId() != null) {
+            throw new HltCustomerException(ErrorCode.INVALID_INPUT);
+        }
+        if (request.getRoleName() == null || request.getRoleName().isBlank()) {
+            throw new HltCustomerException(ErrorCode.INVALID_USER_ROLE);
+        }
+        organizationService.updateUserOrgRole(request.getOrgId(), request.getUserId(), request.getRoleName());
+        return StandardResponse.message("Role updated successfully");
+    }
+
+    @DeleteMapping("/roleRemove")
+    public StandardResponse<Void> removeRole(
+            @RequestBody RoleDTO request) {
+        if (request.getRoleName() == null || request.getRoleName().isBlank()) {
+            throw new HltCustomerException(ErrorCode.INVALID_USER_ROLE);
+        }
+        organizationService.removeUserOrgRole(request.getOrgId(), request.getUserId(), request.getRoleName());
+        return StandardResponse.message("Role removed successfully");
+    }
+
+    private UserRole parseRole(String roleName) {
+        try {
+            String normalized = roleName.trim().toUpperCase();
+            // Accept both with and without ROLE_ prefix
+            if (!normalized.startsWith("ROLE_") && normalized.length() > 0) {
+                normalized = "ROLE_" + normalized;
+            }
+            return UserRole.valueOf(normalized);
+        } catch (IllegalArgumentException ex) {
+            throw new HltCustomerException(ErrorCode.INVALID_USER_ROLE);
+        }
     }
 }

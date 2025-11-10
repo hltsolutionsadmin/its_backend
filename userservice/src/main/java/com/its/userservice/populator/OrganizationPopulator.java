@@ -26,7 +26,6 @@ public class OrganizationPopulator {
             .ownerId(source.getOwner().getId())
             .ownerName(source.getOwner().getUsername())
             .createdAt(source.getCreatedAt())
-            .memberCount(source.getOrganizationUsers().size())
             .build();
     }
 }

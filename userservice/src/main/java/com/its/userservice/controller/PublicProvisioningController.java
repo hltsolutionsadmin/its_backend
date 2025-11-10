@@ -3,7 +3,7 @@ package com.its.userservice.controller;
 import com.its.commonservice.dto.StandardResponse;
 import com.its.userservice.dto.OrganizationDTO;
 import com.its.userservice.dto.ProvisionOrganizationRequestDTO;
-import com.its.userservice.service.ProvisioningService;
+import com.its.userservice.service.impl.ProvisioningService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

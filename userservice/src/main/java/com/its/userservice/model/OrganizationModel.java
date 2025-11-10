@@ -8,14 +8,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Organization entity - multi-tenant organizations
  */
 @Entity
-@Table(name = "organizations", indexes = {
+    @Table(name = "organizations", indexes = {
     @Index(name = "idx_org_code", columnList = "orgCode", unique = true)
 })
 @Data
@@ -62,10 +64,10 @@ public class OrganizationModel {
     @UpdateTimestamp
     @Column(nullable = false)
     private Instant updatedAt;
-    
-    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<OrganizationUserModel> organizationUsers = new HashSet<>();
-    
+
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DepartmentModel> departments = new HashSet<>();
+
+    @Column(name = "PROJECT_IDS")
+    private List<Long> projectIds = new ArrayList<>();
 }

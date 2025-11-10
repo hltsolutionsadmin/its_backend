@@ -1,8 +1,8 @@
 package com.example.issueservice.controller;
 
-import com.example.issueservice.dto.ClientDTO;
-import com.example.issueservice.dto.CreateClientRequestDTO;
-import com.example.issueservice.service.ClientService;
+import com.its.common.dto.ClientDTO;
+import com.its.common.dto.CreateClientRequestDTO;
+import com.example.issueservice.service.impl.ClientService;
 import com.its.commonservice.dto.StandardResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
