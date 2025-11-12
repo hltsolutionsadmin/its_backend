@@ -84,13 +84,13 @@ public class AuthService {
         
         // Generate tokens
         String accessToken = jwtUtil.generateToken(
-            user.getUsername(), 
+            user.getEmail(),
             user.getId(), 
             Collections.singletonList(UserRole.MEMBER.name()), 
             null
         );
         
-        String refreshToken = jwtUtil.generateRefreshToken(user.getUsername(), user.getId());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail(), user.getId());
         
         // Save refresh token
         RefreshTokenModel refreshTokenModel = new RefreshTokenModel();

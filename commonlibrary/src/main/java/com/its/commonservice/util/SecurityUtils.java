@@ -34,6 +34,19 @@ public class SecurityUtils {
         }
         return null;
     }
+
+    public static String getCurrentUserName() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new IllegalStateException("No authenticated user in context");
+        }
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        }
+        return auth.getName();
+    }
 }
 
 

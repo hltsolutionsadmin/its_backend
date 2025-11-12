@@ -98,7 +98,7 @@ public class TicketServiceImpl implements TicketService {
         TicketModel ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new HltCustomerException(ErrorCode.TICKET_NOT_FOUND));
 
-        UserDTO CreatedBy = userClient.getUserByEmail(SecurityUtils.getCurrentUser()).getData();
+        UserDTO CreatedBy = userClient.getUserByEmail(SecurityUtils.getCurrentUserName()).getData();
         if (CreatedBy == null || CreatedBy.getId() == null) {
             throw new HltCustomerException(ErrorCode.USER_NOT_FOUND);
         }
@@ -231,7 +231,7 @@ public class TicketServiceImpl implements TicketService {
 
         if (model.getId() == null) {
 
-            UserDTO CreatedBy = userClient.getUserByEmail(SecurityUtils.getCurrentUser()).getData();
+            UserDTO CreatedBy = userClient.getUserByEmail(SecurityUtils.getCurrentUserName()).getData();
             if (CreatedBy == null || CreatedBy.getId() == null) {
                 throw new HltCustomerException(ErrorCode.USER_NOT_FOUND);
             }
