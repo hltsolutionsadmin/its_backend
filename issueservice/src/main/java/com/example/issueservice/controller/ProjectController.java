@@ -11,20 +11,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("api/projects")
 @AllArgsConstructor
 public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping
+    @PostMapping("/createProject")
     public StandardResponse<ProjectDTO> createProject(@RequestBody ProjectDTO projectDTO) {
         ProjectDTO created = projectService.saveOrUpdateProject(projectDTO);
         return StandardResponse.single(created, "Project created successfully");
     }
 
     @GetMapping("/{projectId}")
-    public StandardResponse<ProjectDTO> getProjectById(@PathVariable Long projectId) {
+    public StandardResponse<ProjectDTO> getProjectById(@PathVariable("projectId") Long projectId) {
         ProjectDTO projectById = projectService.getProjectById(projectId);
         return StandardResponse.single(projectById, "Project fetched successfully");
     }
@@ -32,31 +32,30 @@ public class ProjectController {
     @GetMapping
     public StandardResponse<ProjectDTO> getAllProjects(
             Pageable pageable,
-            @RequestParam(required = false) Long organisationId,
-            @RequestParam(required = false) Long clientId,
-            @RequestParam(required = false) Long managerId,
-            @RequestParam(required = false) String status
+            @RequestParam(name = "organisationId", required = false) Long organisationId,
+            @RequestParam(name = "clientId", required = false) Long clientId,
+            @RequestParam(name = "managerId", required = false) Long managerId,
+            @RequestParam(name = "status", required = false) String status
     ) {
         Page<ProjectDTO> projects = projectService.fetchProjectsWithFilters(pageable, organisationId, clientId, managerId, status);
         return StandardResponse.page(projects);
     }
 
     @DeleteMapping("/{projectId}")
-    public StandardResponse<Void> deleteProject(@PathVariable Long projectId) {
+    public StandardResponse<Void> deleteProject(@PathVariable("projectId") Long projectId) {
         projectService.deleteProject(projectId);
         return StandardResponse.message("Project deleted successfully");
     }
 
     @GetMapping("/organization/{orgId}")
     public StandardResponse<ProjectDTO> getProjectsForOrganization(
-            @PathVariable Long orgId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PathVariable("orgId") Long orgId,
+            Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(page, size);
         Page<ProjectDTO> projects = projectService.getProjectsForOrganization(orgId, pageable);
         return StandardResponse.page(projects);
     }
+
 
     @GetMapping("/stats")
     public ResponseEntity<StandardResponse<ProjectStatsDTO>> getProjectStatistics() {

@@ -20,4 +20,8 @@ public interface UserClient {
 
     @PostMapping("/save")
     StandardResponse<UserDTO> saveUser(@RequestBody UserDTO user);
+
+    @GetMapping("/{userEmail}")
+    StandardResponse<UserDTO> getUserByEmail(@PathVariable("userEmail") String userEmail);
+
 }

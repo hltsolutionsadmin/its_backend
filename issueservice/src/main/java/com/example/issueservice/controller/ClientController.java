@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * Controller for client management endpoints
  */
 @RestController
-@RequestMapping("/api/orgs/{orgId}/clients")
+@RequestMapping("api/orgs/{orgId}/clients")
 @RequiredArgsConstructor
 public class ClientController {
 

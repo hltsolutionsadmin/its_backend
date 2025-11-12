@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,8 @@ public class ProjectServiceImpl implements ProjectService {
             model = new ProjectModel();
 
             model.setProjectCode(generateUniqueProjectCode(projectDTO.getName()));
+            model.setCreatedAt(LocalDateTime.now());
+            model.setUpdatedAt(LocalDateTime.now());
 
         } else {
             model = projectRepository.findById(projectDTO.getId())

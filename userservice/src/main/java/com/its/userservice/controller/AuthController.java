@@ -79,43 +79,4 @@ public class AuthController {
         authService.logout(userId);
         return StandardResponse.single(null, "Logged out successfully");
     }
-
-    @GetMapping("/user/{userId}")
-    public StandardResponse<UserDTO> getUserById(@PathVariable("userId") Long userId) {
-        UserDTO user = userService.getUserById(userId);
-        return StandardResponse.single(user);
-    }
-
-    @PostMapping("/orgs/{userId}")
-    public StandardResponse<OrganizationDTO> createOrganization(
-            @Valid @RequestBody CreateOrganizationRequestDTO request,
-            @PathVariable("userId") Long userId) {
-        OrganizationDTO org = organizationService.createOrganization(request, userId);
-        return StandardResponse.single(org, "Organization created successfully");
-    }
-
-    @GetMapping("/{orgId}")
-    public StandardResponse<OrganizationDTO> getOrganization(
-            @PathVariable("orgId") Long orgId,
-            @RequestParam("userId") Long userId) {
-
-        OrganizationDTO org = organizationService.getOrganizationById(orgId, userId);
-        return StandardResponse.single(org);
-    }
-
-    @PostMapping("/roleAdd")
-    public StandardResponse<Void> addRole(
-            @RequestBody RoleDTO request) {
-        if (request.getRoleName() == null || request.getRoleName().isBlank()) {
-            throw new HltCustomerException(ErrorCode.INVALID_USER_ROLE);
-        }
-        organizationService.updateUserOrgRole(request.getOrgId(), request.getUserId(), request.getRoleName());
-        return StandardResponse.message("Role added successfully");
-    }
-
-    @PostMapping("/save")
-    public StandardResponse<UserDTO> saveUser(@RequestBody UserDTO user) {
-        UserDTO saved = userService.saveUser(user);
-        return StandardResponse.single(saved, "User created successfully");
-    }
 }

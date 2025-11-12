@@ -32,7 +32,7 @@ public class ProjectModel extends GenericModel {
     @EqualsAndHashCode.Include
     private String name;
 
-    @Column(name = "PROJECT_CODE", unique = true, length = 10)
+    @Column(name = "PROJECT_CODE", unique = true, length = 50)
     private String projectCode;
 
     @Column(name = "DESCRIPTION", length = 2000)
@@ -41,7 +41,7 @@ public class ProjectModel extends GenericModel {
     @Column(name = "CLIENT_ID", nullable = true)
     private Long clientId;
 
-    @Column(name = "PROJECT_MANAGER_ID")
+    @Column(name = "MANAGER_ID")
     private Long projectManagerId;
 
     @Column(name = "START_DATE")
@@ -68,7 +68,7 @@ public class ProjectModel extends GenericModel {
     @Column(name = "SLA_TIER")
     private SlaTier slaTier;
 
-    @Column(name = "OWNER_ORG_ID", nullable = true)
+    @Column(name = "ORGANIZATION_ID", nullable = true)
     private Long ownerOrganizationId;
 
     @Column(name = "CLIENT_ORG_ID")
@@ -101,5 +101,8 @@ public class ProjectModel extends GenericModel {
 
     @Column(name = "ARCHIVED", nullable = false)
     private Boolean archived = false;
+
+    @Column(name = "ACTIVE", nullable = false)
+    private Boolean active = true;
 
 }

@@ -31,6 +31,12 @@ public class UserController {
         return StandardResponse.single(user);
     }
 
+    @GetMapping("/{userEmail}")
+    public StandardResponse<UserDTO> getUserByEmail(@PathVariable("userEmail") String userEmail) {
+        UserDTO user = userService.getUserByEmail(userEmail);
+        return StandardResponse.single(user);
+    }
+
     @PutMapping("/{userId}")
     public StandardResponse<UserDTO> updateUser(
             @PathVariable Long userId,

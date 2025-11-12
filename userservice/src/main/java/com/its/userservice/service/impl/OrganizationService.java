@@ -13,6 +13,8 @@ import com.its.userservice.repository.UserRepository;
 import com.its.commonservice.enums.UserRole;
 import com.its.commonservice.exception.ErrorCode;
 import com.its.commonservice.exception.HltCustomerException;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.security.SecureRandom;
 
@@ -131,7 +134,7 @@ public class OrganizationService {
     }
 
     @Transactional
-    public void inviteUserToOrganization(Long orgId, InviteUserRequestDTO request, Long inviterId) {
+    public void inviteUserToOrganization(Long orgId, InviteUserRequestDTO request, Long inviterId, Long userId) {
         log.info("Inviting user {} to organization {}", request.getEmail(), orgId);
 
         OrganizationModel organization = organizationRepository.findById(orgId)
@@ -145,38 +148,48 @@ public class OrganizationService {
         if (inviterOrgUser.getUserRole().getRole() != UserRole.ORG_ADMIN && inviterOrgUser.getUserRole().getRole()!= UserRole.SUPER_ADMIN) {
             throw new HltCustomerException(ErrorCode.NOT_ORG_ADMIN);
         }
+        Optional<UserModel> invitee=userRepository.findById(userId);
+        UserModel user=null;
+        if(!invitee.isPresent()){
+            user=findByEmailIfNotExistCreateNewUser(request.getEmail());
+        }
+        else {
+            user=invitee.get();
+        }
 
-        // Find or create user
-        UserModel invitee = userRepository.findByEmail(request.getEmail())
-            .orElseGet(() -> {
-                log.info("User with email {} not found. Creating a new user for invite.", request.getEmail());
-                UserModel newUser = new UserModel();
-                newUser.setEmail(request.getEmail());
-                String generatedUsername = generateUniqueUsernameFromEmail(request.getEmail());
-                newUser.setUsername(generatedUsername);
-                String tempPassword = generateTemporaryPassword();
-                newUser.setPasswordHash(passwordEncoder.encode(tempPassword));
-                newUser.setActive(true);
-                newUser.setEmailVerified(false);
-                // Names/phone can be set later by the user after activation
-                return userRepository.save(newUser);
-            });
 
         // Check if already a member
-        if (organizationUserRepository.existsByOrganizationIdAndUserId(orgId, invitee.getId())) {
+        if (organizationUserRepository.existsByOrganizationIdAndUserId(orgId, user.getId())) {
             throw new HltCustomerException(ErrorCode.USER_ALREADY_IN_ORG);
         }
 
         OrganizationUserModel orgUser = new OrganizationUserModel();
         orgUser.setOrganization(organization);
-        orgUser.setUser(invitee);
+        orgUser.setUser(user);
         orgUser.setUserRole(roleService.getByName(request.getRole()));
         orgUser.setActive(true);
         orgUser.setInvitedBy(inviterOrgUser.getUser());
 
         organizationUserRepository.save(orgUser);
 
-        log.info("User {} invited to organization {} successfully", invitee.getId(), orgId);
+        log.info("User {} invited to organization {} successfully", user.getId(), orgId);
+    }
+
+    private UserModel findByEmailIfNotExistCreateNewUser(@NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email) {
+        return userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    log.info("User with email {} not found. Creating a new user for invite.", email);
+                    UserModel newUser = new UserModel();
+                    newUser.setEmail(email);
+                    String generatedUsername = generateUniqueUsernameFromEmail(email);
+                    newUser.setUsername(generatedUsername);
+                    String tempPassword = generateTemporaryPassword();
+                    newUser.setPasswordHash(passwordEncoder.encode(tempPassword));
+                    newUser.setActive(true);
+                    newUser.setEmailVerified(false);
+                    // Names/phone can be set later by the user after activation
+                    return userRepository.save(newUser);
+                });
     }
 
     @Transactional

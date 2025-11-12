@@ -14,7 +14,7 @@ import java.util.List;
  * Controller for support group management endpoints
  */
 @RestController
-@RequestMapping("/api/orgs/{orgId}/groups")
+@RequestMapping("api/orgs/{orgId}/groups")
 @RequiredArgsConstructor
 public class GroupController {
 

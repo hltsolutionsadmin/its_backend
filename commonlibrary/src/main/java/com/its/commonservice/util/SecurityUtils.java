@@ -13,23 +13,13 @@ public class SecurityUtils {
         // Private constructor to prevent instantiation
     }
 
-    public static String getCurrentUserName() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public static String getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (principal instanceof UserDetails) {
-            return ((UserDetails) principal).getUsername();
-        } else {
-            return principal.toString();
+        if (auth.getName()!=null) {
+            return auth.getName();
         }
-    }
-
-    public static UserDetailsImpl getCurrentUserDetails() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (principal instanceof UserDetailsImpl) {
-            return (UserDetailsImpl) principal;
-        }
-        return new UserDetailsImpl();
+        return null;
     }
 
     public static String getCurrentToken() {

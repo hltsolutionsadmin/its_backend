@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/subcategories")
+@RequestMapping("api/subcategories")
 @RequiredArgsConstructor
 public class SubCategoryController {
 
