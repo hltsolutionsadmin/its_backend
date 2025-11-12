@@ -1,0 +1,12 @@
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/config/GlobalExceptionHandler.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/AuthServiceApplication.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/entity/UserEntity.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/controller/AuthController.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/entity/RoleEntity.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/service/JwtTokenService.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/service/AuthService.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/service/UserDetailsServiceImpl.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/config/SecurityConfig.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/repository/UserRepository.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/repository/RoleRepository.java
+/Users/jt/Documents/its_backend/its_backend/authservice/src/main/java/com/its/authservice/populator/UserPopulator.java

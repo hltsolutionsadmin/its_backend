@@ -1,12 +1,13 @@
 package com.its.userservice.controller;
 
-import com.its.userservice.dto.AuthResponseDTO;
-import com.its.userservice.dto.LoginRequestDTO;
-import com.its.userservice.dto.EmailLoginRequestDTO;
-import com.its.userservice.dto.RegisterRequestDTO;
-import com.its.userservice.dto.UserDTO;
-import com.its.userservice.service.AuthService;
+import com.its.commonservice.exception.ErrorCode;
+import com.its.commonservice.exception.HltCustomerException;
+import com.its.userservice.dto.*;
+import com.its.common.dto.UserDTO;
+import com.its.userservice.service.impl.AuthService;
 import com.its.commonservice.dto.StandardResponse;
+import com.its.userservice.service.impl.OrganizationService;
+import com.its.userservice.service.impl.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+
+    private final UserService userService;
+
+    private final OrganizationService organizationService;
+
 
     /**
      * Register a new user

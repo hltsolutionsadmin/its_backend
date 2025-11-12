@@ -1,5 +1,6 @@
 package com.its.userservice.model;
 
+import com.its.utils.LongListJsonConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,14 +9,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Organization entity - multi-tenant organizations
  */
 @Entity
-@Table(name = "organizations", indexes = {
+    @Table(name = "organizations", indexes = {
     @Index(name = "idx_org_code", columnList = "orgCode", unique = true)
 })
 @Data
@@ -26,8 +29,8 @@ public class OrganizationModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false, unique = true, length = 200)
+
+    @Column(nullable = false, length = 200)
     private String name;
     
     @Column(nullable = false, unique = true, length = 20)
@@ -62,10 +65,12 @@ public class OrganizationModel {
     @UpdateTimestamp
     @Column(nullable = false)
     private Instant updatedAt;
-    
-    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<OrganizationUserModel> organizationUsers = new HashSet<>();
-    
+
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DepartmentModel> departments = new HashSet<>();
+
+    @Column(name = "PROJECT_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
+    private List<Long> projectIds = new ArrayList<>();
+
 }

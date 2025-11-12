@@ -1,8 +1,8 @@
 package com.example.issueservice.controller;
 
-import com.example.issueservice.dto.CreateGroupRequestDTO;
-import com.example.issueservice.dto.GroupDTO;
-import com.example.issueservice.service.GroupService;
+import com.its.common.dto.CreateGroupRequestDTO;
+import com.its.common.dto.GroupDTO;
+import com.example.issueservice.service.impl.GroupService;
 import com.its.commonservice.dto.StandardResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.List;
  * Controller for support group management endpoints
  */
 @RestController
-@RequestMapping("/api/orgs/{orgId}/groups")
+@RequestMapping("api/orgs/{orgId}/groups")
 @RequiredArgsConstructor
 public class GroupController {
 

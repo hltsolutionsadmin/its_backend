@@ -1,0 +1,12 @@
+com/its/authservice/populator/UserPopulator.class
+com/its/authservice/AuthServiceApplication.class
+com/its/authservice/repository/UserRepository.class
+com/its/authservice/repository/RoleRepository.class
+com/its/authservice/config/SecurityConfig.class
+com/its/authservice/entity/UserEntity.class
+com/its/authservice/service/AuthService.class
+com/its/authservice/config/GlobalExceptionHandler.class
+com/its/authservice/service/UserDetailsServiceImpl.class
+com/its/authservice/service/JwtTokenService.class
+com/its/authservice/controller/AuthController.class
+com/its/authservice/entity/RoleEntity.class

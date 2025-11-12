@@ -65,7 +65,6 @@ public class AuthService {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
-        dto.setRoles(Set.of("ROLE_USER"));
         return dto;
     }
 

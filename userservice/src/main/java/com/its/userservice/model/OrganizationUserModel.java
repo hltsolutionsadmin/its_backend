@@ -1,6 +1,5 @@
 package com.its.userservice.model;
 
-import com.its.commonservice.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,9 +37,9 @@ public class OrganizationUserModel {
     @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
     
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private UserRole role;  // Role within this organization
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private RoleModel userRole;  // Role within this organization
     
     @Column(nullable = false)
     private Boolean active = true;

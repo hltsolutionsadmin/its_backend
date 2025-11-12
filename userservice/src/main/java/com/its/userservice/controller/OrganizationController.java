@@ -3,7 +3,7 @@ package com.its.userservice.controller;
 import com.its.userservice.dto.CreateOrganizationRequestDTO;
 import com.its.userservice.dto.InviteUserRequestDTO;
 import com.its.userservice.dto.OrganizationDTO;
-import com.its.userservice.service.OrganizationService;
+import com.its.userservice.service.impl.OrganizationService;
 import com.its.commonservice.dto.StandardResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,21 +30,19 @@ public class OrganizationController {
     @PostMapping
     public StandardResponse<OrganizationDTO> createOrganization(
             @Valid @RequestBody CreateOrganizationRequestDTO request,
-            @RequestAttribute("userId") Long userId) {
-        
+            @RequestParam("userId") Long userId) {
         OrganizationDTO org = organizationService.createOrganization(request, userId);
         return StandardResponse.single(org, "Organization created successfully");
     }
 
     /**
-     * Get organization by ID
+     * Get organizationgit by ID
      * GET /api/orgs/{orgId}
      */
     @GetMapping("/{orgId}")
     public StandardResponse<OrganizationDTO> getOrganization(
-            @PathVariable Long orgId,
-            @RequestAttribute("userId") Long userId) {
-        
+            @PathVariable("orgId") Long orgId,
+            @RequestParam("userId") Long userId) {  // 👈 explicitly specify name here
         OrganizationDTO org = organizationService.getOrganizationById(orgId, userId);
         return StandardResponse.single(org);
     }
@@ -66,12 +64,11 @@ public class OrganizationController {
      * PUT /api/orgs/{orgId}
      * Requires ORG_ADMIN role
      */
-    @PutMapping("/{orgId}")
+    @PutMapping("update/{orgId}")
     public StandardResponse<OrganizationDTO> updateOrganization(
-            @PathVariable Long orgId,
+            @PathVariable ("orgId") Long orgId,
             @Valid @RequestBody CreateOrganizationRequestDTO request,
-            @RequestAttribute("userId") Long userId) {
-        
+            @RequestParam("userId") Long userId) {
         OrganizationDTO org = organizationService.updateOrganization(orgId, request, userId);
         return StandardResponse.single(org, "Organization updated successfully");
     }
@@ -85,9 +82,9 @@ public class OrganizationController {
     public StandardResponse<Void> inviteUser(
             @PathVariable("orgId") Long orgId,
             @Valid @RequestBody InviteUserRequestDTO request,
-            @RequestAttribute("userId") Long userId) {
-        
-        organizationService.inviteUserToOrganization(orgId, request, userId);
+            @RequestAttribute("userId") Long userId,
+            @RequestParam("newUserId") Long newUserId) {
+        organizationService.inviteUserToOrganization(orgId, request, userId,newUserId);
         return StandardResponse.single(null, "User invited successfully");
     }
 
@@ -98,10 +95,9 @@ public class OrganizationController {
      */
     @DeleteMapping("/{orgId}/users/{targetUserId}")
     public StandardResponse<Void> removeUser(
-            @PathVariable Long orgId,
-            @PathVariable Long targetUserId,
+            @PathVariable ("orgId") Long orgId,
+            @PathVariable ("targetUserId") Long targetUserId,
             @RequestAttribute("userId") Long userId) {
-        
         organizationService.removeUserFromOrganization(orgId, targetUserId, userId);
         return StandardResponse.single(null, "User removed from organization successfully");
     }

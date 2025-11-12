@@ -18,6 +18,6 @@ public class UserPopulator implements Populator<UserEntity, UserDTO> {
         target.setUsername(source.getUsername());
         target.setEmail(source.getEmail());
         Set<String> roles = source.getRoles().stream().map(RoleEntity::getName).collect(Collectors.toSet());
-        target.setRoles(roles);
+
     }
 }

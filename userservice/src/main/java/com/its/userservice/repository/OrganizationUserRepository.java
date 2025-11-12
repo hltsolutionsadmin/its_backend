@@ -24,12 +24,8 @@ public interface OrganizationUserRepository extends JpaRepository<OrganizationUs
     
     boolean existsByOrganizationIdAndUserId(Long organizationId, Long userId);
     
-    @Query("SELECT ou FROM OrganizationUserModel ou WHERE ou.organization.id = :orgId AND ou.user.id = :userId AND ou.role = :role")
-    boolean existsByOrganizationIdAndUserIdAndRole(
-        @Param("orgId") Long orgId, 
-        @Param("userId") Long userId, 
-        @Param("role") UserRole role
-    );
+    // Check membership with a specific role
+    boolean existsByOrganizationIdAndUserIdAndUserRole_Role(Long organizationId, Long userId, UserRole role);
     
     @Query("SELECT COUNT(ou) FROM OrganizationUserModel ou WHERE ou.organization.id = :orgId")
     long countByOrganizationId(@Param("orgId") Long orgId);

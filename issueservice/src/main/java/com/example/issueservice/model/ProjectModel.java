@@ -1,86 +1,108 @@
 package com.example.issueservice.model;
 
+import com.its.utils.LongListJsonConverter;
+import com.its.commonservice.enums.ProjectStatus;
+import com.its.commonservice.enums.ProjectType;
+import com.its.commonservice.enums.SlaTier;
+import com.its.commonservice.enums.GenericModel;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.time.Instant;
+
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.example.issueservice.enums.ProjectStatus;
-import com.example.issueservice.enums.ProjectType;
-
-/**
- * Project entity
- */
 @Entity
-@Table(name = "projects", indexes = {
-    @Index(name = "idx_org_project", columnList = "organizationId,projectCode"),
-    @Index(name = "idx_project_code", columnList = "projectCode")
+@Table(name = "PROJECTS", indexes = {
+        @Index(name = "idx_project_name", columnList = "NAME"),
+        @Index(name = "idx_project_status", columnList = "STATUS"),
+        @Index(name = "idx_project_sla", columnList = "SLA_TIER")
 })
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProjectModel {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(nullable = false)
-    private Long organizationId;  // Reference to Organization in user-service
-    
-    @Column(nullable = false, length = 200)
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@ToString(callSuper = true, exclude = {"tickets", "technologyStack", "userAssignments"})
+public class ProjectModel extends GenericModel {
+
+    @Column(name = "NAME", nullable = false)
+    @EqualsAndHashCode.Include
     private String name;
-    
-    @Column(nullable = false, unique = true, length = 20)
-    private String projectCode;  // e.g., "PROJ", "DEV"
-    
-    @Column(length = 1000)
+
+    @Column(name = "PROJECT_CODE", unique = true, length = 50)
+    private String projectCode;
+
+    @Column(name = "DESCRIPTION", length = 2000)
     private String description;
-    
-    @Column(nullable = false)
-    private Long managerId;  // Reference to User in user-service
-    
-    @Column(nullable = false)
-    private Boolean active = true;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 32)
-    private ProjectStatus status;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 32)
-    private ProjectType type;
-
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private LocalDate targetEndDate;
-    private LocalDate dueDate;
-
-    private Long ownerOrganizationId;
-    private Long clientOrganizationId;
+    @Column(name = "CLIENT_ID", nullable = true)
     private Long clientId;
 
-    @Column
-    private Integer progressPercentage;
-    
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private Instant createdAt;
-    
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private Instant updatedAt;
-    
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
-    private Set<TicketModel> tickets = new HashSet<>();
-    
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
-    private Set<ProjectMemberModel> members = new HashSet<>();
+    @Column(name = "MANAGER_ID")
+    private Long projectManagerId;
+
+    @Column(name = "START_DATE")
+    private LocalDate startDate;
+
+    @Column(name = "END_DATE")
+    private LocalDate endDate;
+
+    @Column(name = "TARGET_END_DATE")
+    private LocalDate targetEndDate;
+
+    @Column(name = "DUE_DATE")
+    private LocalDate dueDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", nullable = true)
+    private ProjectStatus status = ProjectStatus.PLANNED;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TYPE")
+    private ProjectType type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "SLA_TIER")
+    private SlaTier slaTier;
+
+    @Column(name = "ORGANIZATION_ID", nullable = true)
+    private Long ownerOrganizationId;
+
+    @Column(name = "CLIENT_ORG_ID")
+    private Long clientOrganizationId;
+
+    @Column(name = "TICKET_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
+    private List<Long> ticketIds = new ArrayList<>();
+
+    @Column(name = "USER_ASSIGNMENT_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
+    private List<Long> userAssignmentIds = new ArrayList<>();
+
+    @Column(name = "TECH_STACK_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
+    private List<Long> technologyStackIds = new ArrayList<>();
+
+    @Column(name = "USER_GROUPS_IDS", columnDefinition = "TEXT")
+    @Convert(converter = LongListJsonConverter.class)
+    private List<Long> userGroupIds = new ArrayList<>();
+
+    @Column(nullable = true)
+    private int progressPercentage = 0;
+
+    @Column(name = "BUDGET_RANGE")
+    private String budgetRange;
+
+    @Column(name = "EXPECTED_TEAM_SIZE")
+    private String expectedTeamSize;
+
+    @Column(name = "ARCHIVED", nullable = false)
+    private Boolean archived = false;
+
+    @Column(name = "ACTIVE", nullable = false)
+    private Boolean active = true;
+
 }

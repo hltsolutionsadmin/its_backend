@@ -1,11 +1,9 @@
 package com.its.userservice.populator;
 
-import com.its.userservice.dto.UserDTO;
+import com.its.common.dto.UserDTO;
 import com.its.userservice.model.OrganizationUserModel;
 import com.its.userservice.model.UserModel;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
 
 /**
  * Populator for converting UserModel to UserDTO
@@ -26,9 +24,6 @@ public class UserPopulator {
             .active(source.getActive())
             .emailVerified(source.getEmailVerified())
             .createdAt(source.getCreatedAt())
-            .organizations(source.getOrganizationUsers().stream()
-                .map(this::populateOrganization)
-                .collect(Collectors.toList()))
             .build();
     }
     
@@ -53,7 +48,7 @@ public class UserPopulator {
             .orgId(orgUser.getOrganization().getId())
             .orgName(orgUser.getOrganization().getName())
             .orgCode(orgUser.getOrganization().getOrgCode())
-            .role(orgUser.getRole())
+            .role(orgUser.getUserRole().getRole())
             .joinedAt(orgUser.getJoinedAt())
             .build();
     }

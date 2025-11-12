@@ -1,148 +1,79 @@
 package com.example.issueservice.controller;
 
-import com.example.issueservice.dto.*;
+import com.its.common.dto.TicketCommentDTO;
+import com.its.common.dto.TicketDTO;
 import com.example.issueservice.service.TicketService;
 import com.its.commonservice.dto.StandardResponse;
+import com.its.commonservice.enums.TicketStatus;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-/**
- * Controller for ticket management endpoints
- * All responses return StandardResponse<T>
- */
 @RestController
-@RequestMapping("/api/orgs/{orgId}/projects/{projectId}/tickets")
-@RequiredArgsConstructor
+@RequestMapping("api/tickets")
+@AllArgsConstructor
 public class TicketController {
 
     private final TicketService ticketService;
 
-    /**
-     * Create a new ticket
-     * POST /api/orgs/{orgId}/projects/{projectId}/tickets
-     */
     @PostMapping
-    public StandardResponse<TicketDTO> createTicket(
-            @PathVariable("orgId") Long orgId,
-            @PathVariable("projectId") Long projectId,
-            @Valid @RequestBody CreateTicketRequestDTO request,
-            @RequestAttribute("userId") Long userId) {
-        
-        TicketDTO ticket = ticketService.createTicket(orgId, projectId, request, userId);
-        return StandardResponse.single(ticket, "Ticket created successfully");
+    public StandardResponse<TicketDTO> createTicket( @RequestBody TicketDTO ticketDTO) {
+        TicketDTO created = ticketService.createOrUpdateTicket(ticketDTO);
+        return StandardResponse.single(created,"Ticket created successfully" );
     }
 
-    /**
-     * Get all tickets in a project with pagination
-     * GET /api/orgs/{orgId}/projects/{projectId}/tickets
-     */
+    @GetMapping("/{id}")
+    public StandardResponse<TicketDTO> getTicket(@PathVariable("id") Long id) {
+        TicketDTO ticket = ticketService.getTicketById(id);
+        return StandardResponse.single(ticket,"Ticket fetched successfully");
+    }
+
     @GetMapping
-    public StandardResponse<TicketDTO> getProjectTickets(
-            @PathVariable("orgId") Long orgId,
-            @PathVariable("projectId") Long projectId,
-            Pageable pageable) {
-        
-        Page<TicketDTO> tickets = ticketService.getProjectTickets(projectId, pageable);
+    public StandardResponse<TicketDTO> getAllTickets(
+            Pageable pageable,
+            @RequestParam(value = "projectId", required = false) Long projectId,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "priority", required = false) String priority
+    ) {
+        Page<TicketDTO> tickets = ticketService.getAllTickets(pageable, projectId, status, priority);
         return StandardResponse.page(tickets);
     }
 
-    /**
-     * Get ticket by ID
-     * GET /api/orgs/{orgId}/tickets/{ticketId}
-     */
-    @GetMapping("/{ticketId}")
-    public StandardResponse<TicketDTO> getTicket(@PathVariable("ticketId") Long ticketId) {
-        TicketDTO ticket = ticketService.getTicketById(ticketId);
-        return StandardResponse.single(ticket);
+
+    @DeleteMapping("/{id}")
+    public StandardResponse<Void> deleteTicket(@PathVariable("id") Long id) {
+        ticketService.deleteTicket(id);
+        return StandardResponse.message("Ticket deleted successfully");
     }
 
-    /**
-     * Assign ticket to user or group
-     * POST /api/orgs/{orgId}/tickets/{ticketId}/assign
-     */
-    @PostMapping("/{ticketId}/assign")
-    public StandardResponse<Void> assignTicket(
+    @PostMapping("/{id}/comments")
+    public StandardResponse<TicketCommentDTO> addComment(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody TicketCommentDTO commentDTO
+    ) {
+        TicketCommentDTO added = ticketService.addComment(id, commentDTO);
+        return StandardResponse.single(added,"Comment added successfully");
+    }
+
+
+    @PostMapping("/{ticketId}/assign/{assigneeId}")
+    public StandardResponse<TicketDTO> assignTicket(
             @PathVariable("ticketId") Long ticketId,
-            @Valid @RequestBody AssignTicketRequestDTO request,
-            @RequestAttribute("userId") Long userId) {
-        
-        ticketService.assignTicket(ticketId, request, userId);
-        return StandardResponse.single(null, "Ticket assigned successfully");
+            @PathVariable("assigneeId") Long assigneeId) {
+        TicketDTO updated = ticketService.assignTicket(ticketId, assigneeId);
+        return StandardResponse.single(updated,"Ticket assigned successfully");
     }
 
-    /**
-     * Update ticket status
-     * POST /api/orgs/{orgId}/tickets/{ticketId}/status
-     */
-    @PostMapping("/{ticketId}/status")
-    public StandardResponse<Void> updateStatus(
+    @PatchMapping("/{ticketId}/status")
+    public StandardResponse<TicketDTO> updateTicketStatus(
             @PathVariable("ticketId") Long ticketId,
-            @Valid @RequestBody UpdateTicketStatusRequestDTO request,
-            @RequestAttribute("userId") Long userId) {
-        
-        ticketService.updateTicketStatus(ticketId, request, userId);
-        return StandardResponse.single(null, "Ticket status updated successfully");
+            @RequestParam("status") TicketStatus status) {
+        TicketDTO updated = ticketService.updateTicketStatus(ticketId, status);
+        return StandardResponse.single(updated,"Ticket status updated successfully");
     }
 
-    /**
-     * Add comment to ticket
-     * POST /api/orgs/{orgId}/tickets/{ticketId}/comments
-     */
-    @PostMapping("/{ticketId}/comments")
-    public StandardResponse<CommentDTO> addComment(
-            @PathVariable("ticketId") Long ticketId,
-            @Valid @RequestBody AddCommentRequestDTO request,
-            @RequestAttribute("userId") Long userId) {
-        
-        CommentDTO comment = ticketService.addComment(ticketId, request, userId);
-        return StandardResponse.single(comment, "Comment added successfully");
-    }
 
-    /**
-     * Get ticket comments
-     * GET /api/orgs/{orgId}/tickets/{ticketId}/comments
-     */
-    @GetMapping("/{ticketId}/comments")
-    public StandardResponse<CommentDTO> getComments(@PathVariable("ticketId") Long ticketId) {
-        List<CommentDTO> comments = ticketService.getTicketComments(ticketId);
-        return StandardResponse.list(comments);
-    }
 
-    /**
-     * Add internal work note
-     * POST /api/orgs/{orgId}/tickets/{ticketId}/worknotes
-     */
-    @PostMapping("/{ticketId}/worknotes")
-    public StandardResponse<WorkNoteDTO> addWorkNote(
-            @PathVariable("ticketId") Long ticketId,
-            @Valid @RequestBody AddWorkNoteRequestDTO request,
-            @RequestAttribute("userId") Long userId) {
-        WorkNoteDTO note = ticketService.addWorkNote(ticketId, request, userId);
-        return StandardResponse.single(note, "Work note added successfully");
-    }
-
-    /**
-     * Get work notes
-     * GET /api/orgs/{orgId}/tickets/{ticketId}/worknotes
-     */
-    @GetMapping("/{ticketId}/worknotes")
-    public StandardResponse<WorkNoteDTO> getWorkNotes(@PathVariable("ticketId") Long ticketId) {
-        List<WorkNoteDTO> notes = ticketService.getWorkNotes(ticketId);
-        return StandardResponse.list(notes);
-    }
-
-    /**
-     * Get ticket history
-     * GET /api/orgs/{orgId}/tickets/{ticketId}/history
-     */
-    @GetMapping("/{ticketId}/history")
-    public StandardResponse<TicketHistoryDTO> getHistory(@PathVariable("ticketId") Long ticketId) {
-        List<TicketHistoryDTO> history = ticketService.getTicketHistory(ticketId);
-        return StandardResponse.list(history);
-    }
 }
