@@ -1,7 +1,10 @@
 package com.its.userservice.service;
 
 import com.its.common.dto.UserGroupDTO;
+import com.its.commonservice.enums.TicketPriority;
+import com.its.commonservice.enums.TicketStatus;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 public interface UserGroupService {
@@ -17,4 +20,6 @@ public interface UserGroupService {
     UserGroupDTO getById(Long id);
 
     Page<UserGroupDTO> getGroupsByProjectId(Long projectId, Pageable pageable);
+
+    UserGroupDTO getGroupsByProjectAndPriority(Long projectId, TicketPriority priority);
 }

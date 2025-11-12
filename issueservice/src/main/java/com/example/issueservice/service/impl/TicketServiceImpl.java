@@ -16,8 +16,7 @@ import com.example.issueservice.service.TicketService;
 import com.example.issueservice.client.UserGroupClient;
 import com.example.issueservice.client.UserClient;
 
-import com.its.commonservice.enums.TicketPriority;
-import com.its.commonservice.enums.TicketStatus;
+import com.its.commonservice.enums.*;
 import com.its.commonservice.exception.ErrorCode;
 import com.its.commonservice.exception.HltCustomerException;
 import com.its.commonservice.util.CurrentUserUtil;
@@ -29,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,8 +58,9 @@ public class TicketServiceImpl implements TicketService {
 
         if (ticketModel.getId() == null) {
             generateTicketIdIfNew(ticketModel);
+            ticketModel.setCreatedAt(LocalDateTime.now());
         }
-
+        ticketModel.setUpdatedAt(LocalDateTime.now());
         if (ticketModel.getPriority() == TicketPriority.HIGH && ticketModel.getAssignedToId() == null) {
             autoAssignHighPriorityTicket(ticketModel);
         }
@@ -158,9 +159,9 @@ public class TicketServiceImpl implements TicketService {
 
     private void autoAssignHighPriorityTicket(TicketModel ticket) {
         // Fetch groups by project and current ticket status via userservice
-        var response = userGroupClient.getGroupsByProjectAndStatus(
+        var response = userGroupClient.getGroupsByProjectAndPriority(
                 ticket.getProject().getId(),
-                ticket.getStatus() != null ? ticket.getStatus() : TicketStatus.OPEN
+                ticket.getPriority() != null ? ticket.getPriority() : TicketPriority.MEDIUM
                 );
 
         UserGroupDTO groupDto = (response != null) ? response.getData() : null;
@@ -222,7 +223,9 @@ public class TicketServiceImpl implements TicketService {
         } else if (model.getId() == null) {
             model.setPriority(TicketPriority.LOW);
         }
-
+            model.setImpact(dto.getImpact());
+            model.setIssueType(dto.getIssueType());
+            model.setUrgency(dto.getUrgency());
         if (dto.getProjectId() != null) {
             ProjectModel project = projectRepository.findById(dto.getProjectId())
                     .orElseThrow(() -> new HltCustomerException(ErrorCode.PROJECT_NOT_FOUND));

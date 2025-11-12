@@ -24,30 +24,31 @@ public class SubCategoryController {
     }
 
     @PutMapping("/{id}")
-    public StandardResponse<SubCategoryDTO> update(@PathVariable Long id, @RequestBody SubCategoryDTO dto) {
+    public StandardResponse<SubCategoryDTO> update(@PathVariable("id") Long id, @RequestBody SubCategoryDTO dto) {
         SubCategoryDTO updated = subCategoryService.updateSubCategory(id, dto);
         return StandardResponse.single(updated,"Subcategory updated successfully");
     }
 
     @GetMapping("/{id}")
-    public StandardResponse<SubCategoryDTO> get(@PathVariable Long id) {
+    public StandardResponse<SubCategoryDTO> get(@PathVariable("id") Long id) {
         SubCategoryDTO subCategory = subCategoryService.getSubCategory(id);
         return StandardResponse.single(subCategory,"Subcategory fetched successfully" );
     }
 
     @GetMapping("/category/{categoryId}")
     public StandardResponse<SubCategoryDTO> list(
-            @PathVariable Long categoryId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @PathVariable(name = "categoryId") Long categoryId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<SubCategoryDTO> subCategories = subCategoryService.getAllSubCategories(categoryId, pageable);
-        return StandardResponse.page( subCategories);
+        return StandardResponse.page(subCategories);
     }
 
+
     @DeleteMapping("/{id}")
-    public StandardResponse<String> delete(@PathVariable Long id) {
+    public StandardResponse<String> delete(@PathVariable("id") Long id) {
         subCategoryService.deleteSubCategory(id);
         return StandardResponse.message("Subcategory deleted successfully");
     }

@@ -25,7 +25,7 @@ public class TicketController {
     }
 
     @GetMapping("/{id}")
-    public StandardResponse<TicketDTO> getTicket(@PathVariable Long id) {
+    public StandardResponse<TicketDTO> getTicket(@PathVariable("id") Long id) {
         TicketDTO ticket = ticketService.getTicketById(id);
         return StandardResponse.single(ticket,"Ticket fetched successfully");
     }
@@ -33,24 +33,24 @@ public class TicketController {
     @GetMapping
     public StandardResponse<TicketDTO> getAllTickets(
             Pageable pageable,
-            @RequestParam(required = false) Long projectId,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String priority
+            @RequestParam(value = "projectId", required = false) Long projectId,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "priority", required = false) String priority
     ) {
         Page<TicketDTO> tickets = ticketService.getAllTickets(pageable, projectId, status, priority);
-        return StandardResponse.page( tickets);
+        return StandardResponse.page(tickets);
     }
 
 
     @DeleteMapping("/{id}")
-    public StandardResponse<Void> deleteTicket(@PathVariable Long id) {
+    public StandardResponse<Void> deleteTicket(@PathVariable("id") Long id) {
         ticketService.deleteTicket(id);
         return StandardResponse.message("Ticket deleted successfully");
     }
 
     @PostMapping("/{id}/comments")
     public StandardResponse<TicketCommentDTO> addComment(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody TicketCommentDTO commentDTO
     ) {
         TicketCommentDTO added = ticketService.addComment(id, commentDTO);
@@ -60,16 +60,16 @@ public class TicketController {
 
     @PostMapping("/{ticketId}/assign/{assigneeId}")
     public StandardResponse<TicketDTO> assignTicket(
-            @PathVariable Long ticketId,
-            @PathVariable Long assigneeId) {
+            @PathVariable("ticketId") Long ticketId,
+            @PathVariable("assigneeId") Long assigneeId) {
         TicketDTO updated = ticketService.assignTicket(ticketId, assigneeId);
         return StandardResponse.single(updated,"Ticket assigned successfully");
     }
 
     @PatchMapping("/{ticketId}/status")
     public StandardResponse<TicketDTO> updateTicketStatus(
-            @PathVariable Long ticketId,
-            @RequestParam TicketStatus status) {
+            @PathVariable("ticketId") Long ticketId,
+            @RequestParam("status") TicketStatus status) {
         TicketDTO updated = ticketService.updateTicketStatus(ticketId, status);
         return StandardResponse.single(updated,"Ticket status updated successfully");
     }

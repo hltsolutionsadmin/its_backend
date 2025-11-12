@@ -3,6 +3,7 @@ package com.example.issueservice.repository;
 
 import com.example.issueservice.model.ProjectModel;
 import com.its.commonservice.enums.ProjectStatus;
+import com.its.commonservice.enums.TicketStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

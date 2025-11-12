@@ -36,6 +36,9 @@ public class SecurityConfig {
             .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                        "/api/users/**",
+                            "/api/assignments/**",
+                    "/api/usergroups/**",
                     "/api/auth/**",
                     "/api/public/**",
                     "/actuator/health",

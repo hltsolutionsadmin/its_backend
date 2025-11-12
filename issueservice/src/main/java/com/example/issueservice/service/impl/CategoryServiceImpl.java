@@ -63,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDTO getCategory(Long id) {
         log.info("Fetching category by id={}", id);
 
-        CategoryModel model = categoryRepository.findByIdWithSubCategories(id)
+        CategoryModel model = categoryRepository.findById(id)
                 .orElseThrow(() -> new HltCustomerException(ErrorCode.CATEGORY_NOT_FOUND));
 
         CategoryDTO dto = new CategoryDTO();

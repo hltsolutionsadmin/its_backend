@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
         name = "issue-service",
-        url = "${services.issue.base-url:https://localhost:9443/api/usermanagement}",
+        url = "${services.issue.base-url:http://localhost:8084}",
         configuration = FeignNoAuthConfig.class,
-        path = "/projects"
+        path = "/api/projects"
 )
 public interface IssueServiceClient {
 

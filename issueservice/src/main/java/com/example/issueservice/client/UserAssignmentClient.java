@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
         name = "user-service-assignments",
-        url = "${services.user.base-url:https://localhost:9443}",
+        url = "${services.user.base-url:http://localhost:8082}",
         path = "/api/assignments"
 )
 public interface UserAssignmentClient {

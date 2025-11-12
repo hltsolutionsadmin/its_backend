@@ -1,7 +1,9 @@
 package com.its.common.dto;
 
-import com.its.commonservice.enums.TicketPriority;
-import com.its.commonservice.enums.TicketStatus;
+import com.its.commonservice.enums.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -50,5 +52,9 @@ public class TicketDTO {
     private UserGroupDTO userGroupDTO;
 
     private Long ticketNumber;
+    private Urgency urgency;
+    private IssueType issueType;
+    private Impact impact;
+    private Long groupId;
 
 }

@@ -8,6 +8,9 @@ import com.its.common.dto.SubCategoryDTO;
 import com.its.common.populator.Populator;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -53,19 +56,22 @@ public class CategoryPopulator implements Populator<CategoryModel, CategoryDTO> 
         target.setActive(source.getActive());
 
         if (source.getSubCategories() != null && !source.getSubCategories().isEmpty()) {
-            target.setSubCategories(
-                    source.getSubCategories().stream()
-                            .map(sub -> {
-                                SubCategoryModel model = new SubCategoryModel();
-                                model.setId(sub.getId());
-                                model.setName(sub.getName());
-                                model.setDescription(sub.getDescription());
-                                model.setActive(sub.getActive());
-                                model.setCategory(target);
-                                return model;
-                            })
-                            .collect(Collectors.toSet())
-            );
+            Set<SubCategoryModel> subCategories = source.getSubCategories().stream()
+                    .filter(Objects::nonNull)
+                    .map(sub -> {
+                        SubCategoryModel subCat = new SubCategoryModel();
+                        subCat.setId(sub.getId());
+                        subCat.setName(sub.getName());
+                        subCat.setDescription(sub.getDescription());
+                        subCat.setActive(sub.getActive());
+                        // Do NOT set category reference here to avoid recursion
+                        return subCat;
+                    })
+                    .collect(Collectors.toSet()); // Collect directly into a Set
+
+            target.setSubCategories(subCategories);
         }
+
+
     }
 }

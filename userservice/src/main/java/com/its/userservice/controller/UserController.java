@@ -1,6 +1,7 @@
 package com.its.userservice.controller;
 
 import com.its.common.dto.UserDTO;
+import com.its.commonservice.util.SecurityUtils;
 import com.its.userservice.dto.RoleDTO;
 import com.its.userservice.model.OrganizationUserModel;
 import com.its.userservice.service.impl.OrganizationService;
@@ -31,10 +32,13 @@ public class UserController {
         return StandardResponse.single(user);
     }
 
-    @GetMapping("/{userEmail}")
-    public StandardResponse<UserDTO> getUserByEmail(@PathVariable("userEmail") String userEmail) {
-        UserDTO user = userService.getUserByEmail(userEmail);
-        return StandardResponse.single(user);
+    @GetMapping("{email}/email")
+    public StandardResponse<UserDTO> getUserByEmail(@PathVariable("email") String email) {
+        UserDTO user = userService.getUserByEmail(email);
+        if (user == null) {
+            return StandardResponse.error("User not found with email: " + email);
+        }
+        return StandardResponse.single(user, "User fetched successfully");
     }
 
     @PutMapping("/{userId}")

@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
         name = "user-service-users",
-        url = "${services.user.base-url:https://localhost:9443}",
-        path = "/user"
+        url = "${services.user.base-url:http://localhost:8082}",
+        path = "/api/users"
 )
 public interface UserClient {
 
@@ -21,7 +21,7 @@ public interface UserClient {
     @PostMapping("/save")
     StandardResponse<UserDTO> saveUser(@RequestBody UserDTO user);
 
-    @GetMapping("/{userEmail}")
-    StandardResponse<UserDTO> getUserByEmail(@PathVariable("userEmail") String userEmail);
+    @GetMapping("/{email}/email")
+    StandardResponse<UserDTO> getUserByEmail(@PathVariable("email") String email);
 
 }

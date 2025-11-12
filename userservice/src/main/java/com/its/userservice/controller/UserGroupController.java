@@ -2,6 +2,7 @@ package com.its.userservice.controller;
 
 import com.its.common.dto.UserGroupDTO;
 import com.its.commonservice.dto.StandardResponse;
+import com.its.commonservice.enums.TicketPriority;
 import com.its.commonservice.enums.TicketStatus;
 import com.its.userservice.service.UserGroupService;
 import jakarta.validation.Valid;
@@ -25,7 +26,7 @@ public class UserGroupController {
     }
 
     @PutMapping("/{id}")
-    public StandardResponse<UserGroupDTO> update(@PathVariable Long id, @Valid @RequestBody UserGroupDTO dto) {
+    public StandardResponse<UserGroupDTO> update(@PathVariable("id") Long id, @Valid @RequestBody UserGroupDTO dto) {
         UserGroupDTO updatedGroup = userGroupService.update(id, dto);
         return StandardResponse.single(updatedGroup, "User group updated successfully");
     }
@@ -46,21 +47,16 @@ public class UserGroupController {
         return StandardResponse.page(groups);
     }
 
-    @GetMapping("/{projectId}/status/{status}")
-    public StandardResponse<UserGroupDTO> getGroupsByProjectAndStatus(
-            @PathVariable Long projectId,
-            @PathVariable TicketStatus status) {
-        // TODO: Implement filtering by TicketStatus in service/repository/model layers.
-        // For now, get the first group for the project and return it as single object.
-        Page<UserGroupDTO> groups = userGroupService.getGroupsByProjectId(projectId, PageRequest.of(0, 1));
-        if (groups.hasContent()) {
-            return StandardResponse.single(groups.getContent().get(0), "User group fetched successfully");
-        }
-        return StandardResponse.error("User group not found for project");
+    @GetMapping("/{projectId}/{priority}")
+    public StandardResponse<UserGroupDTO> getGroupsByProjectAndPriority(
+            @PathVariable("projectId") Long projectId,
+            @PathVariable("priority") TicketPriority priority) {
+        UserGroupDTO groups = userGroupService.getGroupsByProjectAndPriority(projectId,priority);
+        return StandardResponse.single(groups,"User group not found for project");
     }
     
     @GetMapping("/{id}")
-    public StandardResponse<UserGroupDTO> getById(@PathVariable Long id) {
+    public StandardResponse<UserGroupDTO> getById(@PathVariable("id") Long id) {
         UserGroupDTO group = userGroupService.getById(id);
         return StandardResponse.single(group, "User group fetched successfully");
     }

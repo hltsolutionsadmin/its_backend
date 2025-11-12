@@ -41,7 +41,7 @@ public class UserGroupPopulator implements Populator<UserGroupModel, UserGroupDT
 
         if (source.getGroupLead() != null) {
             UserDTO leadDTO = new UserDTO();
-            userPopulator.populate(source.getGroupLead());
+            leadDTO=userPopulator.populate(source.getGroupLead());
             target.setGroupLead(leadDTO);
         }
     }

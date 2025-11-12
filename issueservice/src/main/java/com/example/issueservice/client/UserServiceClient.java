@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
         name = "user-service",
-        url = "${services.user.base-url:https://localhost:9443}",
+        url = "${services.user.base-url:http://localhost:8082}",
         path = "/api/usergroups"
 )
 public interface UserServiceClient {
