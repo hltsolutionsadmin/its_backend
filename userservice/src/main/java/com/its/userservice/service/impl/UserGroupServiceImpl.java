@@ -1,13 +1,14 @@
 package com.its.userservice.service.impl;
 
+import com.its.common.dto.UserDTO;
 import com.its.common.dto.UserGroupDTO;
 import com.its.commonservice.enums.TicketPriority;
-import com.its.commonservice.enums.TicketStatus;
 import com.its.commonservice.exception.ErrorCode;
 import com.its.commonservice.exception.HltCustomerException;
 import com.its.userservice.model.UserGroupModel;
 import com.its.userservice.model.UserModel;
 import com.its.userservice.populator.UserGroupPopulator;
+import com.its.userservice.populator.UserPopulator;
 import com.its.userservice.repository.UserGroupRepository;
 import com.its.userservice.repository.UserRepository;
 import com.its.userservice.service.UserGroupService;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ public class UserGroupServiceImpl implements UserGroupService {
     private final UserGroupRepository userGroupRepository;
     private final UserGroupPopulator userGroupPopulator;
     private final UserRepository userRepository;
+    private final UserPopulator userPopulator;
 
 
     @Override
@@ -114,6 +117,35 @@ public class UserGroupServiceImpl implements UserGroupService {
     public UserGroupDTO getGroupsByProjectAndPriority(Long projectId, TicketPriority priority) {
         UserGroupDTO userGroup=userGroupPopulator.toDTO(userGroupRepository.getGroupsByProjectIdAndPriority(projectId, priority).orElseThrow(() -> new HltCustomerException(ErrorCode.GROUP_NOT_FOUND)));
         return userGroup;
+    }
+
+    @Override
+    public  void addUserToGroup(Long groupId, Long userId) {
+        UserGroupModel group = userGroupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
+        UserModel user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        group.getMembers().add(user);
+        userGroupRepository.save(group);
+    }
+
+    @Override
+    public void removeUserFromGroup(Long groupId, Long userId) {
+        UserGroupModel group = userGroupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
+        UserModel user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        group.getMembers().remove(user);
+         userGroupRepository.save(group);
+    }
+
+    @Override
+    public Page<UserDTO> getGroupMembers(Long groupId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<UserModel> pageResult = userGroupRepository.findGroupMembers(groupId, pageable);
+        return pageResult.map(userPopulator::populate);
     }
 
     private void validateDuplicateGroup(String groupName, Long projectId) {

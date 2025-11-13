@@ -6,6 +6,9 @@ import com.its.commonservice.enums.TicketPriority;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "USER_GROUPS")
 @Getter
@@ -33,6 +36,14 @@ public class UserGroupModel extends GenericModel {
     @Enumerated(EnumType.STRING)
     @Column(name = "PRIORITY", nullable = false)
     private TicketPriority priority;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_group_members",
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<UserModel> members = new HashSet<>();
 
 
 }
