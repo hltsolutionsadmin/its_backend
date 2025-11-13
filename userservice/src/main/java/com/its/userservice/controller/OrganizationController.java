@@ -1,12 +1,15 @@
 package com.its.userservice.controller;
 
+import com.its.common.dto.UserDTO;
 import com.its.userservice.dto.CreateOrganizationRequestDTO;
 import com.its.userservice.dto.InviteUserRequestDTO;
 import com.its.userservice.dto.OrganizationDTO;
+import com.its.userservice.model.UserModel;
 import com.its.userservice.service.impl.OrganizationService;
 import com.its.commonservice.dto.StandardResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -100,5 +103,14 @@ public class OrganizationController {
             @RequestAttribute("userId") Long userId) {
         organizationService.removeUserFromOrganization(orgId, targetUserId, userId);
         return StandardResponse.single(null, "User removed from organization successfully");
+    }
+
+    @GetMapping("/{organizationId}/users")
+    public StandardResponse<UserDTO> getUsersByOrganization(
+            @PathVariable("organizationId") Long organizationId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        Page<UserDTO> userDTO=organizationService.getUsersByOrganizationId(organizationId, page, size);
+        return StandardResponse.page(userDTO);
     }
 }
