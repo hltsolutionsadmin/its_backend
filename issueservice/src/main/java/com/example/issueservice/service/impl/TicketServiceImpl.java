@@ -32,6 +32,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.its.commonservice.enums.Urgency.CRITICAL;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -218,11 +220,7 @@ public class TicketServiceImpl implements TicketService {
             model.setStatus(TicketStatus.OPEN);
         }
 
-        if (dto.getPriority() != null) {
-            model.setPriority(dto.getPriority());
-        } else if (model.getId() == null) {
-            model.setPriority(TicketPriority.LOW);
-        }
+            model.setPriority(resolvePriority(dto.getImpact(), dto.getUrgency()));
             model.setImpact(dto.getImpact());
             model.setIssueType(dto.getIssueType());
             model.setUrgency(dto.getUrgency());
@@ -258,6 +256,55 @@ public class TicketServiceImpl implements TicketService {
             model.setGroupId(groupDto.getId());
         }
     }
+
+    private TicketPriority resolvePriority(Impact impact, Urgency urgency) {
+        if (impact == null || urgency == null) {
+            // Default to lowest priority if either is missing
+            return TicketPriority.LOW;
+        }
+
+        switch (impact) {
+            case LOW:
+                switch (urgency) {
+                    case LOW:
+                    case MEDIUM: return TicketPriority.LOW;
+                    case HIGH:   return TicketPriority.HIGH;
+                    case CRITICAL: return TicketPriority.CRITICAL;
+                }
+                break;
+
+            case MEDIUM:
+                switch (urgency) {
+                    case LOW:
+                    case MEDIUM:
+                    case HIGH: return TicketPriority.HIGH;
+                    case CRITICAL: return TicketPriority.CRITICAL;
+                }
+                break;
+
+            case HIGH:
+                switch (urgency) {
+                    case LOW:
+                    case MEDIUM: return TicketPriority.MEDIUM;
+                    case HIGH:   return TicketPriority.HIGH;
+                    case CRITICAL: return TicketPriority.CRITICAL;
+                }
+                break;
+
+            case CRITICAL:
+                switch (urgency) {
+                    case LOW:
+                    case MEDIUM: return TicketPriority.MEDIUM;
+                    case HIGH:
+                    case CRITICAL: return TicketPriority.CRITICAL;
+                }
+                break;
+        }
+
+        return TicketPriority.LOW;
+    }
+
+
 
     private <T> void updateIfPresent(T value, java.util.function.Consumer<T> setter) {
         if (value != null) {

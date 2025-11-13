@@ -27,3 +27,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+# Ignore all compiled class files
+*.class
