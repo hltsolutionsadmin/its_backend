@@ -1,6 +1,7 @@
 package com.its.userservice.populator;
 
 import com.its.common.dto.UserDTO;
+import com.its.common.dto.UserOrganizationDTO;
 import com.its.userservice.model.OrganizationUserModel;
 import com.its.userservice.model.UserModel;
 import org.springframework.stereotype.Component;
@@ -43,8 +44,8 @@ public class UserPopulator {
             .build();
     }
     
-    private UserDTO.UserOrganizationDTO populateOrganization(OrganizationUserModel orgUser) {
-        return UserDTO.UserOrganizationDTO.builder()
+    public UserOrganizationDTO populateOrganization(OrganizationUserModel orgUser) {
+        return UserOrganizationDTO.builder()
             .orgId(orgUser.getOrganization().getId())
             .orgName(orgUser.getOrganization().getName())
             .orgCode(orgUser.getOrganization().getOrgCode())

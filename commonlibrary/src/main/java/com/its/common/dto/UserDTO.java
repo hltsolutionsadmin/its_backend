@@ -31,16 +31,5 @@ public class UserDTO {
     private String fullName;
     private String primaryContact;
     private String password;
-    
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class UserOrganizationDTO {
-        private Long orgId;
-        private String orgName;
-        private String orgCode;
-        private UserRole role;
-        private Instant joinedAt;
-    }
+
 }

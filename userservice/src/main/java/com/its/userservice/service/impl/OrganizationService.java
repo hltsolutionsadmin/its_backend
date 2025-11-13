@@ -1,5 +1,7 @@
 package com.its.userservice.service.impl;
 
+import com.its.common.dto.UserDTO;
+import com.its.common.dto.UserOrganizationDTO;
 import com.its.userservice.dto.CreateOrganizationRequestDTO;
 import com.its.userservice.dto.InviteUserRequestDTO;
 import com.its.userservice.dto.OrganizationDTO;
@@ -7,20 +9,25 @@ import com.its.userservice.model.OrganizationModel;
 import com.its.userservice.model.OrganizationUserModel;
 import com.its.userservice.model.UserModel;
 import com.its.userservice.populator.OrganizationPopulator;
+import com.its.userservice.populator.UserPopulator;
 import com.its.userservice.repository.OrganizationRepository;
 import com.its.userservice.repository.OrganizationUserRepository;
 import com.its.userservice.repository.UserRepository;
 import com.its.commonservice.enums.UserRole;
 import com.its.commonservice.exception.ErrorCode;
 import com.its.commonservice.exception.HltCustomerException;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.domain.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,6 +47,7 @@ public class OrganizationService {
     private final OrganizationPopulator organizationPopulator;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final UserPopulator userPopulator;
 
     @Transactional
     public OrganizationDTO createOrganization(CreateOrganizationRequestDTO request, Long ownerId) {
@@ -151,7 +159,7 @@ public class OrganizationService {
         Optional<UserModel> invitee=userRepository.findById(userId);
         UserModel user=null;
         if(!invitee.isPresent()){
-            user=findByEmailIfNotExistCreateNewUser(request.getEmail());
+            user=findByEmailIfNotExistCreateNewUser(request);
         }
         else {
             user=invitee.get();
@@ -175,18 +183,21 @@ public class OrganizationService {
         log.info("User {} invited to organization {} successfully", user.getId(), orgId);
     }
 
-    private UserModel findByEmailIfNotExistCreateNewUser(@NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email) {
-        return userRepository.findByEmail(email)
+    private UserModel findByEmailIfNotExistCreateNewUser(InviteUserRequestDTO request) {
+        return userRepository.findByEmail(request.getEmail())
                 .orElseGet(() -> {
-                    log.info("User with email {} not found. Creating a new user for invite.", email);
+                    log.info("User with email {} not found. Creating a new user for invite.", request.getEmail());
                     UserModel newUser = new UserModel();
-                    newUser.setEmail(email);
-                    String generatedUsername = generateUniqueUsernameFromEmail(email);
-                    newUser.setUsername(generatedUsername);
-                    String tempPassword = generateTemporaryPassword();
-                    newUser.setPasswordHash(passwordEncoder.encode(tempPassword));
+                    newUser.setEmail(request.getEmail());
+                    newUser.setUsername(request.getEmail());
+                    newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
                     newUser.setActive(true);
                     newUser.setEmailVerified(false);
+                    newUser.setFirstName(request.getFirstName());
+                    newUser.setLastName(request.getLastName());
+                    newUser.setPhone(request.getPhone());
+                    newUser.setCreatedAt(Instant.now());
+                    newUser.setUpdatedAt(Instant.now());
                     // Names/phone can be set later by the user after activation
                     return userRepository.save(newUser);
                 });
@@ -278,6 +289,20 @@ public class OrganizationService {
         if (orgUser!=null&&orgUser.getUserRole()!=null&&orgUser.getUserRole().getRole().name().equalsIgnoreCase(roleName)) {
             organizationUserRepository.delete(orgUser);
         }
+    }
+
+    public Page<UserDTO> getUsersByOrganizationId(Long organizationId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<OrganizationUserModel> orgUsersPage = organizationUserRepository.findUsersByOrganizationId(organizationId, pageable);
+
+        return orgUsersPage.map(orgUser -> {
+            UserModel user = orgUser.getUser();
+            UserDTO userDTO = userPopulator.populate(user);
+            UserOrganizationDTO orgDTO = userPopulator.populateOrganization(orgUser);
+            userDTO.setOrganizations(Collections.singletonList(orgDTO));
+
+            return userDTO;
+        });
     }
 
 }

@@ -1,7 +1,11 @@
 package com.its.userservice.repository;
 
+
 import com.its.userservice.model.OrganizationUserModel;
 import com.its.commonservice.enums.UserRole;
+import com.its.userservice.model.UserModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +33,8 @@ public interface OrganizationUserRepository extends JpaRepository<OrganizationUs
     
     @Query("SELECT COUNT(ou) FROM OrganizationUserModel ou WHERE ou.organization.id = :orgId")
     long countByOrganizationId(@Param("orgId") Long orgId);
+
+    @Query("SELECT ou FROM OrganizationUserModel ou WHERE ou.organization.id = :orgId AND ou.active = true")
+    Page<OrganizationUserModel> findUsersByOrganizationId(@Param("orgId") Long orgId, Pageable pageable);
+
 }
