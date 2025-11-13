@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -151,7 +152,7 @@ public class OrganizationService {
         Optional<UserModel> invitee=userRepository.findById(userId);
         UserModel user=null;
         if(!invitee.isPresent()){
-            user=findByEmailIfNotExistCreateNewUser(request.getEmail());
+            user=findByEmailIfNotExistCreateNewUser(request);
         }
         else {
             user=invitee.get();
@@ -175,18 +176,21 @@ public class OrganizationService {
         log.info("User {} invited to organization {} successfully", user.getId(), orgId);
     }
 
-    private UserModel findByEmailIfNotExistCreateNewUser(@NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email) {
-        return userRepository.findByEmail(email)
+    private UserModel findByEmailIfNotExistCreateNewUser(InviteUserRequestDTO request) {
+        return userRepository.findByEmail(request.getEmail())
                 .orElseGet(() -> {
-                    log.info("User with email {} not found. Creating a new user for invite.", email);
+                    log.info("User with email {} not found. Creating a new user for invite.", request.getEmail());
                     UserModel newUser = new UserModel();
-                    newUser.setEmail(email);
-                    String generatedUsername = generateUniqueUsernameFromEmail(email);
-                    newUser.setUsername(generatedUsername);
-                    String tempPassword = generateTemporaryPassword();
-                    newUser.setPasswordHash(passwordEncoder.encode(tempPassword));
+                    newUser.setEmail(request.getEmail());
+                    newUser.setUsername(request.getEmail());
+                    newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
                     newUser.setActive(true);
                     newUser.setEmailVerified(false);
+                    newUser.setFirstName(request.getFirstName());
+                    newUser.setLastName(request.getLastName());
+                    newUser.setPhone(request.getPhone());
+                    newUser.setCreatedAt(Instant.now());
+                    newUser.setUpdatedAt(Instant.now());
                     // Names/phone can be set later by the user after activation
                     return userRepository.save(newUser);
                 });
