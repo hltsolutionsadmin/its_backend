@@ -57,4 +57,7 @@ public class UserModel {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<RoleModel> roles = new HashSet<>();
+
+    @ManyToMany(mappedBy = "members")
+    private Set<UserGroupModel> groups = new HashSet<>();
 }
